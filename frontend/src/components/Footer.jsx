@@ -1,0 +1,166 @@
+import React from "react";
+import { MapPin, Phone, Mail } from "lucide-react";
+
+function Footer() {
+  const quickLinks = [
+    ["Home", "/"],
+    ["Shop", "/shop"],
+    ["Categories", "/categories"],
+    ["About", "/about"],
+    ["Contact", "/contact"],
+  ];
+
+  const categories = [
+    "Earphones",
+    "Chargers",
+    "Phone Cases",
+    "Power Banks",
+    "Smart Watches",
+  ];
+
+  const FacebookIcon = () => (
+    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
+      <path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.5V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.5v2h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z" />
+    </svg>
+  );
+
+  const InstagramIcon = () => (
+    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="none">
+      <rect
+        x="3"
+        y="3"
+        width="18"
+        height="18"
+        rx="5"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r="4"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" />
+    </svg>
+  );
+
+  const TwitterIcon = () => (
+    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
+      <path d="M18.9 3H22l-6.8 7.8L23.2 21h-6.3l-4.9-6.4L6.4 21H3.3l7.3-8.4L2.9 3h6.5l4.4 5.8L18.9 3zm-1.1 16.2h1.7L8.5 4.7H6.7l11.1 14.5z" />
+    </svg>
+  );
+
+  const YoutubeIcon = () => (
+    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
+      <path d="M21.6 7.2s-.2-1.7-.9-2.4c-.8-.9-1.8-.9-2.2-1C15.5 3.5 12 3.5 12 3.5s-3.5 0-6.5.3c-.4.1-1.4.1-2.2 1-.7.7-.9 2.4-.9 2.4S2.2 9.1 2.2 11v1.8c0 1.9.2 3.8.2 3.8s.2 1.7.9 2.4c.8.9 1.9.9 2.4 1 1.7.2 6.3.3 6.3.3s3.5 0 6.5-.3c.4-.1 1.4-.1 2.2-1 .7-.7.9-2.4.9-2.4s.2-1.9.2-3.8V11c0-1.9-.2-3.8-.2-3.8zM10.1 14.8V8.7l5.8 3.1-5.8 3z" />
+    </svg>
+  );
+
+  const socials = [
+    { label: "Facebook", Icon: FacebookIcon },
+    { label: "Instagram", Icon: InstagramIcon },
+    { label: "Twitter", Icon: TwitterIcon },
+    { label: "YouTube", Icon: YoutubeIcon },
+  ];
+
+  return (
+    <footer className="relative bg-[#05080B] border-t border-white/10 text-white overflow-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:64px_64px] opacity-60 pointer-events-none" />
+
+      <div className="relative max-w-[1360px] mx-auto px-6 md:px-10 py-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <a href="/" className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-[#20BFFF] flex items-center justify-center shadow-[0_0_25px_rgba(32,191,255,0.35)]">
+              <span className="text-black font-bold text-lg">R</span>
+            </div>
+
+            <div>
+              <h2 className="text-white font-bold text-xl leading-none">
+                Ravi<span className="text-[#20BFFF]">X</span>
+              </h2>
+              <p className="mt-2 text-[11px] tracking-[0.35em] text-gray-400 uppercase">
+                Mobile Accessories
+              </p>
+            </div>
+          </a>
+
+          <p className="mt-6 max-w-xs text-gray-400 leading-relaxed">
+            Premium mobile accessories at honest prices. Fast delivery, trusted
+            service, lifetime support.
+          </p>
+
+          <div className="mt-6 flex gap-3">
+            {socials.map(({ label, Icon }) => (
+              <a
+                key={label}
+                href="#"
+                aria-label={label}
+                className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:text-[#20BFFF] hover:border-[#20BFFF] hover:shadow-[0_0_20px_rgba(32,191,255,0.25)] transition"
+              >
+                <Icon />
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-bold text-lg mb-6">Quick Links</h4>
+          <ul className="space-y-3 text-gray-400">
+            {quickLinks.map(([label, href]) => (
+              <li key={href}>
+                <a href={href} className="hover:text-[#20BFFF] transition">
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-bold text-lg mb-6">Categories</h4>
+          <ul className="space-y-3 text-gray-400">
+            {categories.map((category) => (
+              <li key={category}>
+                <a href="/shop" className="hover:text-[#20BFFF] transition">
+                  {category}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-bold text-lg mb-6">Contact</h4>
+          <ul className="space-y-4 text-gray-400">
+            <li className="flex gap-4">
+              <MapPin size={19} className="text-[#20BFFF] shrink-0 mt-1" />
+              <span>123 Tech Plaza, Mumbai, India</span>
+            </li>
+            <li className="flex gap-4">
+              <Phone size={18} className="text-[#20BFFF] shrink-0 mt-1" />
+              <span>+91 98765 43210</span>
+            </li>
+            <li className="flex gap-4">
+              <Mail size={18} className="text-[#20BFFF] shrink-0 mt-1" />
+              <span>hello@ravix.store</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="relative border-t border-white/10">
+        <div className="max-w-[1360px] mx-auto px-6 md:px-10 py-7 flex flex-col md:flex-row justify-between gap-3 text-sm text-gray-400">
+          <p>
+            © {new Date().getFullYear()} RaviX Mobile Accessories. All rights
+            reserved.
+          </p>
+          <p>Crafted with precision for tech enthusiasts.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export default Footer;
