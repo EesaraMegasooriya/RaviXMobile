@@ -12,43 +12,70 @@ import {
   Watch,
   MoveUpRight,
 } from "lucide-react";
+import { FloatingWhatsApp } from "react-floating-whatsapp";
+import Logo from "../assets/Logo.png";
+
+import FrOffer1 from "../assets/FirstPageOffers/FrOffer1.JPG";
+import FrOffer2 from "../assets/FirstPageOffers/FrOffer2.JPG";
+import FrOffer3 from "../assets/FirstPageOffers/FrOffer3.JPG";
+import FrOffer4 from "../assets/FirstPageOffers/FrOffer4.JPG";
+import FrOffer5 from "../assets/FirstPageOffers/FrOffer5.JPG";
+import FrOffer6 from "../assets/FirstPageOffers/FrOffer6.JPG";
+
 
 function Home() {
   const products = [
-    {
-      brand: "RAVIX",
-      name: "Pulse Pro Wireless Earbuds",
-      price: "$79.99",
-      oldPrice: "$109.99",
-      rating: "4.8",
-      badge: "-27%",
-      img: "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?q=80&w=900",
-    },
-    {
-      brand: "APPLE",
-      name: "iPhone 15 Slim Matte Case",
-      price: "$19.99",
-      rating: "4.6",
-      badge: "New",
-      img: "https://images.unsplash.com/photo-1603313011102-320f26a4f6f6?q=80&w=900",
-    },
-    {
-      brand: "SAMSUNG",
-      name: "65W GaN Fast Charger",
-      price: "$34.99",
-      oldPrice: "$49.99",
-      rating: "4.7",
-      badge: "-30%",
-      img: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=900",
-    },
-    {
-      brand: "RAVIX",
-      name: "20000mAh PD Power Bank",
-      price: "$44.99",
-      rating: "4.9",
-      img: "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?q=80&w=900",
-    },
-  ];
+  {
+    brand: "APPLE",
+    name: "Apple AirPods Max Wireless Headphones",
+    price: "LKR 79.99",
+    oldPrice: "$109.99",
+    rating: "4.8",
+    badge: "-27%",
+    img: FrOffer1,
+  },
+  {
+    brand: "ASPOR",
+    name: "ASPOR A628 TWS Wireless Earbuds",
+    price: "$19.99",
+    rating: "4.6",
+    badge: "New",
+    img: FrOffer5,
+  },
+  {
+    brand: "ASPOR",
+    name: "ASPOR A396 20000mAh Power Bank",
+    price: "$34.99",
+    oldPrice: "$49.99",
+    rating: "4.7",
+    badge: "-30%",
+    img: FrOffer6,
+  },
+  {
+    brand: "BASEUS",
+    name: "BASEUS PALM 20W Fast Charger",
+    price: "$44.99",
+    rating: "4.9",
+    img: FrOffer2,
+  },
+  {
+    brand: "APPLE",
+    name: "Apple 20W USB-C Power Adapter",
+    price: "$59.99",
+    oldPrice: "$79.99",
+    rating: "4.5",
+    badge: "-25%",
+    img: FrOffer3,
+  },
+  {
+    brand: "APPLE",
+    name: "USB-C to Lightning Cable",
+    price: "$129.99",
+    rating: "4.8",
+    badge: "Best Seller",
+    img: FrOffer4,
+  },
+];
 
   const features = [
     [Truck, "Free Shipping", "On orders over $50"],
@@ -294,6 +321,14 @@ function Home() {
           ))}
         </div>
       </section>
+
+      <FloatingWhatsApp
+          phoneNumber="+94703280480"
+          accountName="RavixMobile"
+          chatMessage="Hello there! 🤝 How can I help?"
+          avatar={Logo}
+          statusMessage="Online"
+        />
     </main>
   );
 }
