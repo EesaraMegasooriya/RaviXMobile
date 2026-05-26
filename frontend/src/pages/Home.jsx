@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { FloatingWhatsApp } from "react-floating-whatsapp";
 import Logo from "../assets/Logo.png";
+import Image from "../assets/image.png";
 
 import FrOffer1 from "../assets/FirstPageOffers/FrOffer1.JPG";
 import FrOffer2 from "../assets/FirstPageOffers/FrOffer2.JPG";
@@ -31,7 +32,7 @@ function Home() {
     price: "LKR 4750",
     oldPrice: "LKR 5500",
     rating: "4.8",
-    badge: "-27%",
+    // badge: "-27%",
     img: FrOffer1,
   },
   {
@@ -48,7 +49,7 @@ function Home() {
     price: "LKR 4500",
     oldPrice: "LKR 4900",
     rating: "4.7",
-    badge: "-30%",
+    // badge: "-30%",
     img: FrOffer6,
   },
   {
@@ -64,7 +65,7 @@ function Home() {
     price: "LKR 3500",
     oldPrice: "LKR 4000",
     rating: "4.5",
-    badge: "-25%",
+    // badge: "-25%",
     img: FrOffer3,
   },
   {
@@ -146,13 +147,34 @@ function Home() {
           </div>
 
           <div className="relative">
-            <div className="absolute inset-0 bg-cyan-400/20 blur-[80px]" />
-            <img
-              src="https://images.unsplash.com/photo-1603539947678-cd3954ed515d?q=80&w=1400"
-              alt="Mobile accessories"
-              className="relative w-full rounded-[28px] shadow-2xl object-cover h-[360px] md:h-[430px]"
-            />
-          </div>
+  <div className="absolute inset-0 bg-cyan-400/20 blur-[80px]" />
+
+ <div className="relative">
+  <div className="absolute inset-0 bg-cyan-400/20 blur-[80px]" />
+
+  <div className="relative overflow-hidden rounded-[28px] shadow-2xl border border-white/10 bg-white/[0.03]">
+    <img
+      src={Image}
+      alt="Premium RaviX mobile accessories including earbuds, chargers, power banks, and smart wearables"
+      loading="eager"
+      fetchPriority="high"
+      decoding="async"
+      className="w-full h-auto max-h-[430px] object-contain object-center bg-[#05080B]"
+    />
+
+    <div className="absolute inset-0 bg-gradient-to-t from-[#05080B]/35 via-transparent to-transparent pointer-events-none" />
+
+    <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-white/10 bg-black/35 backdrop-blur-md px-5 py-4">
+      <p className="text-sm text-cyan-400 font-semibold uppercase tracking-[0.25em]">
+        RaviX Collection
+      </p>
+      <h3 className="mt-1 text-xl font-bold text-white">
+        Premium Mobile Accessories
+      </h3>
+    </div>
+  </div>
+</div>
+</div>
         </div>
       </section>
 
@@ -323,12 +345,16 @@ function Home() {
       </section>
 
       <FloatingWhatsApp
-          phoneNumber="+94703280480"
-          accountName="RavixMobile"
-          chatMessage="Hello there! 🤝 How can I help?"
-          avatar={Logo}
-          statusMessage="Online"
-        />
+  phoneNumber="+94703280480"
+  accountName="RavixMobile"
+  chatMessage="Hello there! 🤝 How can I help?"
+  avatar={Logo}
+  statusMessage="Online"
+  inputStyle={{
+    color: "#000000",
+    backgroundColor: "#ffffff",
+  }}
+/>
     </main>
   );
 }

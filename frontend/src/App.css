@@ -1,0 +1,19 @@
+/* Floating WhatsApp typing input fix */
+.floating-whatsapp-chatbox textarea,
+.floating-whatsapp-chatbox input {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  caret-color: #000000 !important;
+}
+
+.floating-whatsapp-chatbox textarea::placeholder,
+.floating-whatsapp-chatbox input::placeholder {
+  color: #666666 !important;
+}
+
+/* Optional: selected text color */
+.floating-whatsapp-chatbox textarea::selection,
+.floating-whatsapp-chatbox input::selection {
+  background: #bdefff !important;
+  color: #000000 !important;
+}

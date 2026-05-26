@@ -1,5 +1,6 @@
 import React from "react";
 import { MapPin, Phone, Mail } from "lucide-react";
+import Logo from "../assets/Logo.png";
 
 function Footer() {
   const quickLinks = [
@@ -36,13 +37,7 @@ function Footer() {
         stroke="currentColor"
         strokeWidth="2"
       />
-      <circle
-        cx="12"
-        cy="12"
-        r="4"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
       <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" />
     </svg>
   );
@@ -78,9 +73,11 @@ function Footer() {
       <div className="relative max-w-[1360px] mx-auto px-6 md:px-10 py-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <a href="/" className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#20BFFF] flex items-center justify-center shadow-[0_0_25px_rgba(32,191,255,0.35)]">
-              <span className="text-black font-bold text-lg">R</span>
-            </div>
+            <img
+              src={Logo}
+              alt="RaviX Logo"
+              className="w-12 h-12 rounded-2xl object-contain shadow-[0_0_25px_rgba(32,191,255,0.35)]"
+            />
 
             <div>
               <h2 className="text-white font-bold text-xl leading-none">
@@ -131,7 +128,10 @@ function Footer() {
           <ul className="space-y-3 text-gray-400">
             {categories.map((category) => (
               <li key={category}>
-                <a href="/categories" className="hover:text-[#20BFFF] transition">
+                <a
+                  href="/categories"
+                  className="hover:text-[#20BFFF] transition"
+                >
                   {category}
                 </a>
               </li>
@@ -148,7 +148,10 @@ function Footer() {
             </li>
             <li className="flex gap-4">
               <Phone size={18} className="text-[#20BFFF] shrink-0 mt-1" />
-              <a href="tel:0703280480" className="hover:text-[#20BFFF] transition">
+              <a
+                href="tel:0703280480"
+                className="hover:text-[#20BFFF] transition"
+              >
                 070 328 0480
               </a>
             </li>
@@ -171,7 +174,17 @@ function Footer() {
             © {new Date().getFullYear()} RaviX Mobile Accessories. All rights
             reserved.
           </p>
-          <p>Crafted with precision for tech enthusiasts.</p>
+          <p>
+            Crafted with{" "}
+            <a
+              href="https://www.nexonick.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#20BFFF] hover:underline"
+            >
+              nexonick Solutions
+            </a>
+          </p>
         </div>
       </div>
     </footer>
