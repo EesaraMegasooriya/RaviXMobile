@@ -11,11 +11,12 @@ function Footer() {
   ];
 
   const categories = [
-    "Earphones",
+    "Earbuds",
     "Chargers",
-    "Phone Cases",
     "Power Banks",
     "Smart Watches",
+    "Cables",
+    "Speakers",
   ];
 
   const FacebookIcon = () => (
@@ -46,23 +47,28 @@ function Footer() {
     </svg>
   );
 
-  const TwitterIcon = () => (
+  const TikTokIcon = () => (
     <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
-      <path d="M18.9 3H22l-6.8 7.8L23.2 21h-6.3l-4.9-6.4L6.4 21H3.3l7.3-8.4L2.9 3h6.5l4.4 5.8L18.9 3zm-1.1 16.2h1.7L8.5 4.7H6.7l11.1 14.5z" />
-    </svg>
-  );
-
-  const YoutubeIcon = () => (
-    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
-      <path d="M21.6 7.2s-.2-1.7-.9-2.4c-.8-.9-1.8-.9-2.2-1C15.5 3.5 12 3.5 12 3.5s-3.5 0-6.5.3c-.4.1-1.4.1-2.2 1-.7.7-.9 2.4-.9 2.4S2.2 9.1 2.2 11v1.8c0 1.9.2 3.8.2 3.8s.2 1.7.9 2.4c.8.9 1.9.9 2.4 1 1.7.2 6.3.3 6.3.3s3.5 0 6.5-.3c.4-.1 1.4-.1 2.2-1 .7-.7.9-2.4.9-2.4s.2-1.9.2-3.8V11c0-1.9-.2-3.8-.2-3.8zM10.1 14.8V8.7l5.8 3.1-5.8 3z" />
+      <path d="M16.6 5.2c-.7-.8-1.1-1.9-1.1-3.2h-3.1v13.1c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5 1.1-2.5 2.5-2.5c.3 0 .6.1.8.2V9.6c-.3 0-.5-.1-.8-.1-3.1 0-5.6 2.5-5.6 5.6s2.5 5.6 5.6 5.6 5.6-2.5 5.6-5.6V8.6c1.3.9 2.8 1.4 4.4 1.5V7c-1.3-.1-2.4-.7-3.3-1.8z" />
     </svg>
   );
 
   const socials = [
-    { label: "Facebook", Icon: FacebookIcon },
-    { label: "Instagram", Icon: InstagramIcon },
-    { label: "Twitter", Icon: TwitterIcon },
-    { label: "YouTube", Icon: YoutubeIcon },
+    {
+      label: "Facebook",
+      href: "https://www.facebook.com/share/17Z9s6hGNH/",
+      Icon: FacebookIcon,
+    },
+    {
+      label: "TikTok",
+      href: "https://www.tiktok.com/@ravix.mobile.lk",
+      Icon: TikTokIcon,
+    },
+    {
+      label: "Instagram",
+      href: "https://www.instagram.com/ravixmobile.lk?igsh=eXMweXdhbmRsdjRt",
+      Icon: InstagramIcon,
+    },
   ];
 
   return (
@@ -92,10 +98,12 @@ function Footer() {
           </p>
 
           <div className="mt-6 flex gap-3">
-            {socials.map(({ label, Icon }) => (
+            {socials.map(({ label, href, Icon }) => (
               <a
                 key={label}
-                href="#"
+                href={href}
+                target="_blank"
+                rel="noreferrer"
                 aria-label={label}
                 className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:text-[#20BFFF] hover:border-[#20BFFF] hover:shadow-[0_0_20px_rgba(32,191,255,0.25)] transition"
               >
@@ -123,7 +131,7 @@ function Footer() {
           <ul className="space-y-3 text-gray-400">
             {categories.map((category) => (
               <li key={category}>
-                <a href="/shop" className="hover:text-[#20BFFF] transition">
+                <a href="/categories" className="hover:text-[#20BFFF] transition">
                   {category}
                 </a>
               </li>
@@ -136,15 +144,22 @@ function Footer() {
           <ul className="space-y-4 text-gray-400">
             <li className="flex gap-4">
               <MapPin size={19} className="text-[#20BFFF] shrink-0 mt-1" />
-              <span>123 Tech Plaza, Mumbai, India</span>
+              <span>Gampaha, Sri Lanka</span>
             </li>
             <li className="flex gap-4">
               <Phone size={18} className="text-[#20BFFF] shrink-0 mt-1" />
-              <span>+91 98765 43210</span>
+              <a href="tel:0703280480" className="hover:text-[#20BFFF] transition">
+                070 328 0480
+              </a>
             </li>
             <li className="flex gap-4">
               <Mail size={18} className="text-[#20BFFF] shrink-0 mt-1" />
-              <span>hello@ravix.store</span>
+              <a
+                href="mailto:ravixmobile.lk@gmail.com"
+                className="hover:text-[#20BFFF] transition break-all"
+              >
+                ravixmobile.lk@gmail.com
+              </a>
             </li>
           </ul>
         </div>

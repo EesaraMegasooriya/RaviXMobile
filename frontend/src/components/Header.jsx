@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { Menu, ShoppingCart, X } from "lucide-react";
+import { Menu, X,ShoppingCart } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import Logo from "../assets/Logo.png";
 
 function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
 
   const links = [
     { name: "Home", href: "/" },
@@ -12,14 +15,24 @@ function Header() {
     { name: "Contact", href: "/contact" },
   ];
 
+  const isActive = (href) => {
+    if (href === "/") {
+      return location.pathname === "/";
+    }
+
+    return location.pathname.startsWith(href);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#05080B] border-b border-white/5">
       <nav className="max-w-[1360px] mx-auto h-[92px] px-6 md:px-10 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-[#20BFFF] flex items-center justify-center shadow-[0_0_25px_rgba(32,191,255,0.35)]">
-            <span className="text-black font-bold text-lg">R</span>
-          </div>
+        <Link to="/" className="flex items-center gap-3">
+          <img
+            src={Logo}
+            alt="RaviX Logo"
+            className="w-12 h-12 rounded-2xl object-contain shadow-[0_0_25px_rgba(32,191,255,0.35)]"
+          />
 
           <div>
             <h1 className="text-white font-bold text-xl leading-none">
@@ -29,28 +42,32 @@ function Header() {
               Mobile Accessories
             </p>
           </div>
-        </a>
+        </Link>
 
         {/* Desktop Menu */}
         <ul className="hidden md:flex items-center gap-8">
-          {links.map((link, index) => (
-            <li key={link.name}>
-              <a
-                href={link.href}
-                className={`relative pb-4 text-[15px] font-medium transition-colors ${
-                  index === 0
-                    ? "text-[#20BFFF]"
-                    : "text-gray-400 hover:text-[#20BFFF]"
-                }`}
-              >
-                {link.name}
+          {links.map((link) => {
+            const active = isActive(link.href);
 
-                {index === 0 && (
-                  <span className="absolute left-0 right-0 -bottom-0 h-[2px] bg-[#20BFFF] rounded-full" />
-                )}
-              </a>
-            </li>
-          ))}
+            return (
+              <li key={link.name}>
+                <Link
+                  to={link.href}
+                  className={`relative pb-4 text-[15px] font-medium transition-colors ${
+                    active
+                      ? "text-[#20BFFF]"
+                      : "text-gray-400 hover:text-[#20BFFF]"
+                  }`}
+                >
+                  {link.name}
+
+                  {active && (
+                    <span className="absolute left-0 right-0 -bottom-0 h-[2px] bg-[#20BFFF] rounded-full" />
+                  )}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
 
         {/* Actions */}
@@ -76,21 +93,25 @@ function Header() {
       {mobileOpen && (
         <div className="md:hidden bg-[#05080B] border-t border-white/10 px-6 pb-6">
           <ul className="flex flex-col gap-1">
-            {links.map((link, index) => (
-              <li key={link.name}>
-                <a
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`block py-4 text-base font-medium border-b border-white/5 ${
-                    index === 0
-                      ? "text-[#20BFFF]"
-                      : "text-gray-400 hover:text-[#20BFFF]"
-                  }`}
-                >
-                  {link.name}
-                </a>
-              </li>
-            ))}
+            {links.map((link) => {
+              const active = isActive(link.href);
+
+              return (
+                <li key={link.name}>
+                  <Link
+                    to={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block py-4 text-base font-medium border-b border-white/5 ${
+                      active
+                        ? "text-[#20BFFF]"
+                        : "text-gray-400 hover:text-[#20BFFF]"
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

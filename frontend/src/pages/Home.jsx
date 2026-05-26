@@ -78,7 +78,7 @@ function Home() {
 ];
 
   const features = [
-    [Truck, "Free Shipping", "On orders over $50"],
+    [Truck, "Free Shipping", "On orders over 10000 LKR"],
     [ShieldCheck, "2-Year Warranty", "On all RaviX products"],
     [Headphones, "24/7 Support", "Real humans, real fast"],
     [Sparkles, "Trusted Brands", "Apple, Samsung, Anker"],

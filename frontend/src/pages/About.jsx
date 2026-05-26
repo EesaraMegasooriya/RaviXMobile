@@ -105,7 +105,7 @@ function About() {
           {[
             ["24h", "Order Processing"],
             ["2-5 Days", "Standard Delivery"],
-            ["Free", "Shipping over $50"],
+            ["Free", "Shipping over 10000 LKR"],
           ].map(([number, label]) => (
             <div key={label} className="text-center">
               <h3 className="text-5xl md:text-6xl font-black text-[#20BFFF]">
