@@ -9,7 +9,7 @@ Product images are **direct HTTP/HTTPS URLs**. The database stores the URL only.
 Use Node.js 22.12+ and a running MongoDB instance.
 
 1. Copy `backend/.env.example` to `backend/.env`. Set `MONGODB_URI`, a long random `JWT_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`.
-2. Copy `frontend/.env.example` to `frontend/.env`. The development API URL defaults to `http://localhost:5001/api`; production defaults to same-origin `/api`.
+2. Copy `frontend/.env.example` to `frontend/.env`. The development API URL defaults to `http://localhost:5001/api`; production defaults to `https://api.ravixmobile.com/api`.
 3. Run `npm ci --prefix backend` and `npm ci --prefix frontend`.
 4. In separate terminals, run `npm run dev --prefix backend` and `npm run dev --prefix frontend`.
 5. Open the frontend URL, visit `/admin`, log in with the configured credentials, create a category, then add a product with a public direct image URL.
@@ -28,7 +28,7 @@ Backend variables:
 
 Frontend variables (set before building):
 
-- `VITE_API_URL`: complete API base URL including `/api`.
+- `VITE_API_URL`: backend server origin, e.g. `https://api.ravixmobile.com`. The frontend adds `/api` automatically; legacy values already ending in `/api` remain supported.
 - `VITE_WHATSAPP_NUMBER`: international number using digits only, default `94703280480`.
 
 Contact-page/footer phone, email, location, and existing marketing/policy text are maintained in the corresponding React components. Confirm these business details before publishing.

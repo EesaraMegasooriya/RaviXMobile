@@ -1,4 +1,14 @@
-# Host RaviXMobile on your server
+# Deploy RaviXMobile
+
+## Current setup: Netlify frontend + hosted API
+
+The backend is hosted at `https://api.ravixmobile.com`. Deploy the frontend using the root `netlify.toml`, which sets `VITE_API_URL=https://api.ravixmobile.com`, builds `frontend`, and publishes `frontend/dist`. The shared frontend API helper adds `/api` to requests. See [frontend deployment steps](frontend/README.md#netlify-deployment).
+
+Keep the hosted backend environment set to `ALLOWED_ORIGINS=https://ravixmobile.com,https://www.ravixmobile.com`. Deploy previews require their own allowed origin if you want them to access the API. If those origins are not already active on the hosted backend, update its environment and restart it. The deployed API was confirmed to return HTTP 403 for the production origins. The backend source now always allows both production domains, with extra origins accepted from the environment. Deploy this backend change and recreate/restart the running service; a frontend redeploy alone cannot change API CORS.
+
+## Alternative: self-host both services with Docker
+
+The following instructions are for hosting both the frontend and backend on one server. They are not needed for the current Netlify frontend.
 
 The app uses MongoDB Atlas. MySQL is not required. Products, categories, customer reviews, and homepage hero settings persist in MongoDB; image URLs are stored as text. Orders go to WhatsApp.
 

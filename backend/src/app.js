@@ -31,7 +31,7 @@ const normalizeOrigin = (origin) =>
 /*
 Example Render environment variable:
 
-ALLOWED_ORIGINS=https://ravixmobile.netlify.app,http://localhost:5173
+ALLOWED_ORIGINS=https://ravixmobile.com,https://www.ravixmobile.com
 
 Multiple origins must be separated using commas.
 */
@@ -44,6 +44,8 @@ const environmentOrigins = (
   .filter(Boolean);
 
 const allowedOrigins = new Set([
+  "https://ravixmobile.com",
+  "https://www.ravixmobile.com",
   "http://localhost:5173",
   "http://localhost:5174",
   ...environmentOrigins,
