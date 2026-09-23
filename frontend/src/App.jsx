@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 
 import Header from "./components/Header";
+import WebLoader from "./components/WebLoader";
 const Home = lazy(() => import("./pages/Home"));
 import Footer from "./components/Footer";
 const About = lazy(() => import("./pages/About"));
@@ -12,6 +13,8 @@ const Shop = lazy(() => import("./pages/Shop"));
 const Categories = lazy(() => import("./pages/Categories"));
 const Contact = lazy(() => import("./pages/Contact"));
 
+
+
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 function App() {
@@ -19,7 +22,7 @@ function App() {
     <BrowserRouter>
       <Header />
 
-      <Suspense fallback={<main className="min-h-screen bg-[#05080B] pt-40 text-center text-white" role="status">Loading...</main>}>
+      <Suspense fallback={<WebLoader />}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />

@@ -1,150 +1,35 @@
 import ServiceError from "../components/ServiceError";
 import ProductPrice, { Availability } from "../components/ProductPrice";
 import { pricing, availabilityOf, purchaseLabel, whatsappProductUrl } from "../lib/products";
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { API_BASE_URL, WHATSAPP_NUMBER, getProductImageUrl } from "../lib/api";
+import {
+  Search,
+  SlidersHorizontal,
+  X,
+  ArrowRight,
+  Package,
+  MessageCircle,
+  Star,
+} from "lucide-react";
 
-/* -------------------------------------------------------------------------- */
-/*                                   Icons                                    */
-/* -------------------------------------------------------------------------- */
-
-function SearchIcon({ className = "h-5 w-5" }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
-  );
-}
-
-function CartIcon({ className = "h-5 w-5" }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <circle cx="9" cy="20" r="1" />
-      <circle cx="18" cy="20" r="1" />
-      <path d="M3 4h2l2.5 11h10l2-7H6" />
-    </svg>
-  );
-}
-
-function FilterIcon({ className = "h-5 w-5" }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M4 6h16" />
-      <path d="M7 12h10" />
-      <path d="M10 18h4" />
-    </svg>
-  );
-}
-
-function CloseIcon({ className = "h-5 w-5" }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M6 6l12 12" />
-      <path d="M18 6 6 18" />
-    </svg>
-  );
-}
-
-function ArrowIcon({ className = "h-4 w-4" }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M5 12h14" />
-      <path d="m13 6 6 6-6 6" />
-    </svg>
-  );
-}
-
-function PackageIcon({ className = "h-10 w-10" }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      aria-hidden="true"
-    >
-      <path d="m12 3 8 4-8 4-8-4 8-4Z" />
-      <path d="M4 7v10l8 4 8-4V7" />
-      <path d="M12 11v10" />
-    </svg>
-  );
-}
-
-function WhatsAppIcon({
-  className = "h-6 w-6",
-}) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 32 32"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M16.03 3C8.84 3 3 8.77 3 15.88c0 2.27.6 4.49 1.73 6.43L3 29l6.88-1.77a13.18 13.18 0 0 0 6.15 1.54C23.21 28.77 29 23 29 15.88S23.21 3 16.03 3Zm0 23.56c-1.94 0-3.84-.51-5.5-1.47l-.39-.23-4.08 1.05 1.09-3.96-.26-.41a10.54 10.54 0 0 1-1.66-5.66c0-5.85 4.84-10.66 10.8-10.66 5.95 0 10.78 4.81 10.78 10.66 0 5.87-4.83 10.68-10.78 10.68Zm5.92-7.98c-.32-.16-1.91-.93-2.21-1.04-.3-.1-.51-.16-.73.16-.21.32-.83 1.04-1.02 1.25-.19.21-.38.24-.7.08-.33-.16-1.38-.5-2.62-1.6a9.83 9.83 0 0 1-1.82-2.23c-.19-.32-.02-.5.14-.66.15-.14.33-.37.49-.56.16-.18.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.73-1.73-1-2.37-.26-.63-.53-.54-.73-.55h-.62c-.22 0-.57.08-.87.4-.3.32-1.13 1.09-1.13 2.66 0 1.57 1.16 3.08 1.32 3.3.16.21 2.28 3.44 5.52 4.82.77.33 1.37.52 1.84.67.77.24 1.47.21 2.03.13.62-.09 1.91-.77 2.18-1.51.27-.74.27-1.37.19-1.51-.08-.13-.3-.21-.62-.37Z" />
-    </svg>
-  );
-}
+const SURFACE = "border border-white/[0.06] bg-[#0B0F16]";
+const RADIUS = "rounded-2xl";
 
 /* -------------------------------------------------------------------------- */
 /*                              Product Image                                 */
 /* -------------------------------------------------------------------------- */
 
 function ProductImage({ product }) {
-  const [imageFailed, setImageFailed] =
-    useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   if (!product.img || imageFailed) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-slate-600">
-        <PackageIcon className="h-14 w-14" />
-
-        <span className="text-xs font-semibold uppercase tracking-[0.18em]">
-          No image
-        </span>
+      <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-600">
+        <Package size={32} strokeWidth={1.6} />
+        <span className="text-xs font-medium">No image</span>
       </div>
     );
   }
@@ -155,7 +40,7 @@ function ProductImage({ product }) {
       alt={product.name}
       loading="lazy"
       onError={() => setImageFailed(true)}
-      className="h-full w-full object-contain p-5 transition duration-500 group-hover:scale-105"
+      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
     />
   );
 }
@@ -164,59 +49,77 @@ function ProductImage({ product }) {
 /*                              Product Card                                  */
 /* -------------------------------------------------------------------------- */
 
-function ProductCard({
-  product,
-}) {
-  return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.045] shadow-[0_20px_70px_rgba(0,0,0,0.3)] backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-cyan-400/40 hover:shadow-[0_20px_70px_rgba(0,190,255,0.12)]">
-      <div className="relative h-60 overflow-hidden bg-gradient-to-br from-white/[0.07] to-transparent">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(0,190,255,0.13),transparent_55%)]" />
+function ProductCard({ product }) {
+  const navigate = useNavigate();
+  const productHref = `/products/${product._id}`;
+  const goToProduct = () => navigate(productHref);
+  // Stop the WhatsApp/Details clicks from also triggering the card's own navigation.
+  const stopBubble = (event) => event.stopPropagation();
 
+  return (
+    <article
+      onClick={goToProduct}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") goToProduct();
+      }}
+      role="link"
+      tabIndex={0}
+      aria-label={product.name}
+      className={`group flex h-full cursor-pointer flex-col overflow-hidden ${RADIUS} ${SURFACE} transition hover:border-cyan-400/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60`}
+    >
+      <div className="relative aspect-square shrink-0 bg-black">
         <ProductImage product={product} />
 
         {product.badge && (
-          <span className="absolute left-4 top-4 rounded-full border border-cyan-300/20 bg-cyan-400 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#041014] shadow-[0_8px_30px_rgba(0,190,255,0.25)]">
+          <span className="absolute left-3 top-3 rounded-full bg-cyan-400 px-3 py-1 text-xs font-bold text-black">
             {product.badge}
           </span>
         )}
 
-        <span className="absolute bottom-4 right-4 rounded-full border border-white/10 bg-black/50 px-3 py-1 text-xs font-semibold text-slate-200 backdrop-blur-md">
-          ★ {Number(product.rating || 0).toFixed(1)}
+        <span className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full border border-white/10 bg-black/60 px-2.5 py-1 text-xs font-medium text-gray-200 backdrop-blur-sm">
+          <Star size={12} className="fill-cyan-300 text-cyan-300" />
+          {Number(product.rating || 0).toFixed(1)}
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-cyan-400">
-            {product.brand}
-          </span>
-
+      <div className="flex min-w-0 flex-1 flex-col gap-3 p-5">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+          <span className="min-w-0 truncate font-medium text-gray-300">{product.brand}</span>
           {product.category && (
             <>
-              <span className="h-1 w-1 rounded-full bg-slate-600" />
-
-              <span className="text-xs font-medium text-slate-400">
-                {product.category}
-              </span>
+              <span className="h-1 w-1 shrink-0 rounded-full bg-gray-700" />
+              <span className="truncate">{product.category}</span>
             </>
           )}
         </div>
 
-        <h3 className="line-clamp-2 min-h-[52px] text-lg font-bold leading-6 text-white">
-          <Link to={`/products/${product._id}`} className="hover:text-cyan-400">{product.name}</Link>
+        <h3 className="line-clamp-2 min-h-11 text-base font-semibold leading-6 group-hover:text-cyan-300">
+          {product.name}
         </h3>
-        <div className="mt-3"><Availability product={product} /></div>
 
-        <div className="mt-auto pt-6">
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-            Price
-          </p>
+        <Availability product={product} />
 
+        <div className="mt-auto space-y-3 pt-2">
           <ProductPrice product={product} />
-          <Link to={`/products/${product._id}`} className="mt-3 inline-block text-sm text-cyan-400 underline">View details</Link>
-          <a href={whatsappProductUrl(product, { phone: WHATSAPP_NUMBER, origin: window.location.origin })} target="_blank" rel="noreferrer" className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3.5 text-sm font-extrabold text-black transition hover:bg-[#20bd5a]">
-            <WhatsAppIcon className="h-5 w-5" />{purchaseLabel(product)}
-          </a>
+          <div className="flex gap-2">
+            <Link
+              to={productHref}
+              onClick={stopBubble}
+              className="flex-1 rounded-lg border border-white/10 py-2.5 text-center text-sm font-medium text-gray-300 transition hover:border-cyan-400/40 hover:text-cyan-300"
+            >
+              Details
+            </Link>
+            <a
+              href={whatsappProductUrl(product, { phone: WHATSAPP_NUMBER, origin: window.location.origin })}
+              target="_blank"
+              rel="noreferrer"
+              onClick={stopBubble}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#25D366] py-2.5 text-sm font-semibold text-black transition hover:brightness-105"
+            >
+              <MessageCircle size={15} />
+              {purchaseLabel(product)}
+            </a>
+          </div>
         </div>
       </div>
     </article>
@@ -233,42 +136,30 @@ function Shop() {
   const [categories, setCategories] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] =
-    useState(searchParams.get("category") || "");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
   const [onSaleOnly, setOnSaleOnly] = useState(searchParams.get("sale") === "true");
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
 
-  const [showMobileFilters, setShowMobileFilters] =
-    useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] =
-    useState("");
-
-
+  const [errorMessage, setErrorMessage] = useState("");
 
   const fetchShopData = async () => {
     try {
       setLoading(true);
       setErrorMessage("");
 
-      const [productsResponse, categoriesResponse] =
-        await Promise.all([
-          axios.get(`${API_BASE_URL}/products`),
-          axios.get(`${API_BASE_URL}/categories`),
-        ]);
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        axios.get(`${API_BASE_URL}/products`),
+        axios.get(`${API_BASE_URL}/categories`),
+      ]);
 
-      setProducts(
-        productsResponse.data.products || []
-      );
-
-      setCategories(
-        categoriesResponse.data.categories || []
-      );
+      setProducts(productsResponse.data.products || []);
+      setCategories(categoriesResponse.data.categories || []);
     } catch (error) {
       console.error("Unable to load shop:", error);
-
       setErrorMessage("Something went wrong. Please contact RaviX Mobile for help.");
     } finally {
       setLoading(false);
@@ -281,95 +172,42 @@ function Shop() {
     fetchShopData();
   }, []);
 
-
-
-
-
   const filteredProducts = useMemo(() => {
-    const normalizedSearch = searchTerm
-      .trim()
-      .toLowerCase();
+    const normalizedSearch = searchTerm.trim().toLowerCase();
 
     const filtered = products.filter((product) => {
       if (onSaleOnly && !pricing(product).discounted) return false;
       if (inStockOnly && availabilityOf(product) !== "in_stock") return false;
-      const matchesCategory =
-        !selectedCategory ||
-        product.category === selectedCategory;
 
-      if (!matchesCategory) {
-        return false;
-      }
+      const matchesCategory = !selectedCategory || product.category === selectedCategory;
+      if (!matchesCategory) return false;
 
-      if (!normalizedSearch) {
-        return true;
-      }
+      if (!normalizedSearch) return true;
 
-      const searchableContent = [
-        product.brand,
-        product.name,
-        product.category,
-        product.badge,
-        product.description,
-      ]
+      const searchableContent = [product.brand, product.name, product.category, product.badge, product.description]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
 
-      return searchableContent.includes(
-        normalizedSearch
-      );
+      return searchableContent.includes(normalizedSearch);
     });
 
-    return [...filtered].sort(
-      (firstProduct, secondProduct) => {
-        switch (sortBy) {
-          case "price-low":
-            return (
-              pricing(firstProduct).current -
-              pricing(secondProduct).current
-            );
-
-          case "price-high":
-            return (
-              pricing(secondProduct).current -
-              pricing(firstProduct).current
-            );
-
-          case "rating":
-            return (
-              Number(secondProduct.rating || 0) -
-              Number(firstProduct.rating || 0)
-            );
-
-          case "name":
-            return String(
-              firstProduct.name || ""
-            ).localeCompare(
-              String(secondProduct.name || "")
-            );
-
-          case "newest":
-          default:
-            return (
-              new Date(
-                secondProduct.createdAt || 0
-              ).getTime() -
-              new Date(
-                firstProduct.createdAt || 0
-              ).getTime()
-            );
-        }
+    return [...filtered].sort((firstProduct, secondProduct) => {
+      switch (sortBy) {
+        case "price-low":
+          return pricing(firstProduct).current - pricing(secondProduct).current;
+        case "price-high":
+          return pricing(secondProduct).current - pricing(firstProduct).current;
+        case "rating":
+          return Number(secondProduct.rating || 0) - Number(firstProduct.rating || 0);
+        case "name":
+          return String(firstProduct.name || "").localeCompare(String(secondProduct.name || ""));
+        case "newest":
+        default:
+          return new Date(secondProduct.createdAt || 0).getTime() - new Date(firstProduct.createdAt || 0).getTime();
       }
-    );
-  }, [
-    products,
-    searchTerm,
-    selectedCategory,
-    sortBy,
-    onSaleOnly,
-    inStockOnly,
-  ]);
+    });
+  }, [products, searchTerm, selectedCategory, sortBy, onSaleOnly, inStockOnly]);
 
   const clearFilters = () => {
     setSearchTerm("");
@@ -379,351 +217,200 @@ function Shop() {
     setInStockOnly(false);
   };
 
-  const hasActiveFilters =
-    searchTerm ||
-    onSaleOnly || inStockOnly ||
-    selectedCategory ||
-    sortBy !== "newest";
+  const hasActiveFilters = searchTerm || onSaleOnly || inStockOnly || selectedCategory || sortBy !== "newest";
+
+  const sortOptions = [
+    ["newest", "Newest first"],
+    ["price-low", "Price: low to high"],
+    ["price-high", "Price: high to low"],
+    ["rating", "Highest rated"],
+    ["name", "Product name"],
+  ];
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#05080B] text-white">
-      {/* Background effects */}
-
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-[-200px] top-[-100px] h-[500px] w-[500px] rounded-full bg-cyan-500/10 blur-[140px]" />
-
-        <div className="absolute bottom-[-200px] right-[-150px] h-[550px] w-[550px] rounded-full bg-blue-700/10 blur-[160px]" />
-
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-            backgroundSize: "42px 42px",
-          }}
-        />
-      </div>
-
-      {/* Navigation */}
-
-
-
+    <main className="min-h-screen bg-[#05080B] text-white">
       {/* Hero */}
+      <section className="relative overflow-hidden border-b border-white/[0.06] pt-32 pb-16 md:pt-40">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:56px_56px]" />
+        <div className="pointer-events-none absolute -top-32 left-1/3 h-[420px] w-[560px] rounded-full bg-cyan-500/10 blur-[150px]" />
 
-      <section className="mt-10 relative z-10 border-b border-white/10">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[1.2fr_0.8fr] lg:px-8 lg:py-24">
-          <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-cyan-400">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-400" />
-              RaviX Collection
-            </div>
-
-            <h1 className="max-w-3xl text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-              Upgrade your mobile
-              <span className="block bg-gradient-to-r from-cyan-300 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                experience.
-              </span>
-            </h1>
-
-            <p className="mt-6 max-w-2xl text-base leading-7 text-slate-400 sm:text-lg">
-              Explore premium mobile accessories,
-              wireless earbuds, chargers, cables, power
-              banks and more from trusted brands.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center gap-5">
-              <a
-                href="#products"
-                className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3.5 text-sm font-extrabold text-[#031015] transition hover:bg-cyan-300"
-              >
-                Browse products
-                <ArrowIcon />
-              </a>
-
-              <p className="text-sm text-slate-500">
-                <span className="font-bold text-white">
-                  {products.length}
-                </span>{" "}
-                products in the catalog
-              </p>
-            </div>
-          </div>
-
-          <div className="relative hidden min-h-[320px] lg:block">
-            <div className="absolute inset-0 rounded-[32px] border border-white/10 bg-gradient-to-br from-cyan-400/10 via-white/[0.03] to-blue-700/10 shadow-[0_30px_100px_rgba(0,190,255,0.1)]" />
-
-            <div className="absolute inset-5 overflow-hidden rounded-[26px] border border-white/10 bg-[#080D12]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(0,190,255,0.22),transparent_55%)]" />
-
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <PackageIcon className="h-24 w-24 text-cyan-400" />
-
-                <p className="mt-5 text-xl font-black">
-                  Premium Mobile Accessories
-                </p>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  Quality products. Modern technology.
-                </p>
-              </div>
-            </div>
-          </div>
+        <div className="relative mx-auto max-w-[1360px] px-6 md:px-10">
+          <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+            Every RaviX accessory, in one place.
+          </h1>
+          <p className="mt-5 max-w-xl text-lg text-gray-400">
+            Wireless earbuds, chargers, cables and power banks from trusted
+            brands — filter by category or search for exactly what you need.
+          </p>
+          <p className="mt-5 text-sm text-gray-500">
+            <span className="font-semibold text-white">{products.length}</span> products in the catalog
+          </p>
         </div>
       </section>
 
       {/* Shop content */}
-
-      <section
-        id="products"
-        className="relative z-10 mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16"
-      >
+      <section className="mx-auto max-w-[1360px] px-6 py-14 md:px-10">
         {/* Search and sort */}
-
-        <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl sm:p-5">
-          <div className="flex flex-col gap-4 lg:flex-row">
+        <div className={`${RADIUS} ${SURFACE} p-4 sm:p-5`}>
+          <div className="flex flex-col gap-3 lg:flex-row">
             <div className="relative min-w-0 flex-1">
-              <SearchIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
-
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
               <input
                 type="search"
                 value={searchTerm}
-                onChange={(event) =>
-                  setSearchTerm(event.target.value)
-                }
-                placeholder="Search products, brands or categories..."
-                className="w-full rounded-xl border border-white/10 bg-black/30 py-3.5 pl-12 pr-11 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400/50 focus:ring-4 focus:ring-cyan-400/10"
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search products, brands or categories…"
+                className="w-full rounded-xl border border-white/10 bg-black/30 py-3.5 pl-11 pr-11 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-cyan-400/50"
               />
-
               {searchTerm && (
                 <button
                   type="button"
                   onClick={() => setSearchTerm("")}
                   aria-label="Clear search"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 transition hover:text-white"
                 >
-                  <CloseIcon className="h-4 w-4" />
+                  <X size={16} />
                 </button>
               )}
             </div>
 
             <button
               type="button"
-              onClick={() =>
-                setShowMobileFilters(
-                  (currentValue) => !currentValue
-                )
-              }
-              className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 px-5 py-3.5 text-sm font-bold text-slate-200 lg:hidden"
+              onClick={() => setShowMobileFilters((v) => !v)}
+              className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 px-5 py-3.5 text-sm font-medium text-gray-300 lg:hidden"
             >
-              <FilterIcon />
+              <SlidersHorizontal size={16} />
               Filters
             </button>
 
             <select
               aria-label="Sort products"
               value={sortBy}
-              onChange={(event) =>
-                setSortBy(event.target.value)
-              }
-              className="hidden min-w-[210px] rounded-xl border border-white/10 bg-[#0B1015] px-4 py-3.5 text-sm font-semibold text-slate-200 outline-none focus:border-cyan-400/50 lg:block"
+              onChange={(event) => setSortBy(event.target.value)}
+              className="hidden min-w-[200px] rounded-xl border border-white/10 bg-black/30 px-4 py-3.5 text-sm font-medium text-gray-300 outline-none focus:border-cyan-400/50 lg:block"
             >
-              <option value="newest">
-                Newest first
-              </option>
-
-              <option value="price-low">
-                Price: low to high
-              </option>
-
-              <option value="price-high">
-                Price: high to low
-              </option>
-
-              <option value="rating">
-                Highest rated
-              </option>
-
-              <option value="name">
-                Product name
-              </option>
+              {sortOptions.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
 
-      <div className="mt-5 flex flex-wrap gap-6 text-sm">
-        <label className="flex items-center gap-2"><input type="checkbox" checked={onSaleOnly} onChange={e => setOnSaleOnly(e.target.checked)} />On sale</label>
-        <label className="flex items-center gap-2"><input type="checkbox" checked={inStockOnly} onChange={e => setInStockOnly(e.target.checked)} />In stock only</label>
-      </div>
-
-          {/* Mobile controls */}
+          <div className="mt-4 flex flex-wrap gap-6 text-sm text-gray-300">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={onSaleOnly} onChange={(e) => setOnSaleOnly(e.target.checked)} />
+              On sale
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={inStockOnly} onChange={(e) => setInStockOnly(e.target.checked)} />
+              In stock only
+            </label>
+          </div>
 
           {showMobileFilters && (
-            <div className="mt-4 border-t border-white/10 pt-4 lg:hidden">
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
-                Sort products
-              </label>
-
+            <div className="mt-4 border-t border-white/[0.06] pt-4 lg:hidden">
+              <label className="mb-2 block text-xs font-medium text-gray-500">Sort products</label>
               <select
                 aria-label="Sort products"
                 value={sortBy}
-                onChange={(event) =>
-                  setSortBy(event.target.value)
-                }
-                className="w-full rounded-xl border border-white/10 bg-[#0B1015] px-4 py-3.5 text-sm font-semibold text-slate-200 outline-none"
+                onChange={(event) => setSortBy(event.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3.5 text-sm font-medium text-gray-300 outline-none"
               >
-                <option value="newest">
-                  Newest first
-                </option>
-
-                <option value="price-low">
-                  Price: low to high
-                </option>
-
-                <option value="price-high">
-                  Price: high to low
-                </option>
-
-                <option value="rating">
-                  Highest rated
-                </option>
-
-                <option value="name">
-                  Product name
-                </option>
+                {sortOptions.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </div>
           )}
         </div>
 
-        {/* Dynamic categories */}
-
-        <div className="mt-7">
+        {/* Categories */}
+        <div className="mt-8">
           <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-cyan-400">
-                Categories
-              </p>
-
-              <h2 className="mt-1 text-2xl font-black">
-                Find what you need
-              </h2>
-            </div>
-
+            <h2 className="text-xl font-bold">Categories</h2>
             {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-sm font-bold text-slate-400 transition hover:text-cyan-400"
-              >
+              <button type="button" onClick={clearFilters} className="text-sm font-medium text-gray-400 hover:text-cyan-300">
                 Clear filters
               </button>
             )}
           </div>
 
-          <div className="mt-5 flex gap-3 overflow-x-auto pb-3">
+          <div className="mt-4 flex gap-2.5 overflow-x-auto pb-2">
             <button
               type="button"
-              onClick={() =>
-                setSelectedCategory("")
-              }
-              className={`shrink-0 rounded-full border px-5 py-2.5 text-sm font-bold transition ${
+              onClick={() => setSelectedCategory("")}
+              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
                 !selectedCategory
-                  ? "border-cyan-400 bg-cyan-400 text-[#031015]"
-                  : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-cyan-400/40 hover:text-cyan-400"
+                  ? "border-cyan-400 bg-cyan-400 text-black"
+                  : "border-white/10 text-gray-300 hover:border-cyan-400/40 hover:text-cyan-300"
               }`}
             >
-              All products
-              <span className="ml-2 opacity-70">
-                {products.length}
-              </span>
+              All products <span className="opacity-70">{products.length}</span>
             </button>
 
             {categories.map((category) => (
               <button
                 key={category._id}
                 type="button"
-                onClick={() =>
-                  setSelectedCategory(category.name)
-                }
-                className={`shrink-0 rounded-full border px-5 py-2.5 text-sm font-bold transition ${
+                onClick={() => setSelectedCategory(category.name)}
+                className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
                   selectedCategory === category.name
-                    ? "border-cyan-400 bg-cyan-400 text-[#031015]"
-                    : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-cyan-400/40 hover:text-cyan-400"
+                    ? "border-cyan-400 bg-cyan-400 text-black"
+                    : "border-white/10 text-gray-300 hover:border-cyan-400/40 hover:text-cyan-300"
                 }`}
               >
-                {category.name}
-
-                <span className="ml-2 opacity-70">
-                  {category.productCount ?? ""}
-                </span>
+                {category.name} <span className="opacity-70">{category.productCount ?? ""}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Results title */}
-
-        <div className="mt-9 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        {/* Results */}
+        <div className="mt-10 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
-            <h2 className="text-2xl font-black sm:text-3xl">
-              {selectedCategory || "All Products"}
-            </h2>
-
-            <p className="mt-2 text-sm text-slate-500">
-              {filteredProducts.length} product
-              {filteredProducts.length === 1
-                ? ""
-                : "s"}{" "}
-              found
-              {searchTerm
-                ? ` for "${searchTerm}"`
-                : ""}
+            <h2 className="text-2xl font-bold">{selectedCategory || "All products"}</h2>
+            <p className="mt-1.5 text-sm text-gray-500">
+              {filteredProducts.length} product{filteredProducts.length === 1 ? "" : "s"} found
+              {searchTerm ? ` for "${searchTerm}"` : ""}
             </p>
           </div>
 
           {selectedCategory && (
             <button
               type="button"
-              onClick={() =>
-                setSelectedCategory("")
-              }
-              className="self-start text-sm font-bold text-cyan-400 transition hover:text-cyan-300 sm:self-auto"
+              onClick={() => setSelectedCategory("")}
+              className="inline-flex items-center gap-1.5 self-start text-sm font-medium text-cyan-300 hover:text-cyan-200 sm:self-auto"
             >
-              View all products
+              View all products <ArrowRight size={14} />
             </button>
           )}
         </div>
 
-        {/* Product states */}
-
         {loading ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/10 border-t-cyan-400" />
-
-            <p className="mt-5 text-sm font-semibold text-slate-500">
-              Loading RaviX products...
-            </p>
+          <div className="flex min-h-[300px] flex-col items-center justify-center">
+            <div className="h-9 w-9 animate-spin rounded-full border-2 border-white/10 border-t-cyan-400" />
+            <p className="mt-4 text-sm text-gray-500">Loading RaviX products…</p>
           </div>
         ) : errorMessage ? (
-          <div className="mt-8"><ServiceError onRetry={fetchShopData} /></div>
+          <div className="mt-8">
+            <ServiceError message={errorMessage} onRetry={fetchShopData} />
+          </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="mt-8 flex min-h-[360px] flex-col items-center justify-center rounded-[24px] border border-white/10 bg-white/[0.035] px-6 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.04] text-slate-500">
-              <PackageIcon />
+          <div className={`mt-8 flex min-h-[300px] flex-col items-center justify-center px-6 text-center ${RADIUS} ${SURFACE}`}>
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 text-gray-500">
+              <Package size={24} />
             </div>
-
-            <h3 className="mt-6 text-xl font-black">
-              No products found
-            </h3>
-
-            <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-              No products match your current search and
-              category filters.
+            <h3 className="mt-5 text-lg font-semibold">No products found</h3>
+            <p className="mt-2 max-w-md text-sm text-gray-500">
+              No products match your current search and category filters.
             </p>
-
             <button
               type="button"
               onClick={clearFilters}
-              className="mt-6 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-5 py-3 text-sm font-bold text-cyan-400 transition hover:bg-cyan-400 hover:text-[#031015]"
+              className="mt-6 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-5 py-2.5 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-black"
             >
               Clear filters
             </button>
@@ -731,20 +418,13 @@ function Shop() {
         ) : (
           <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProducts.map((product) => (
-              <ProductCard
-  key={product._id}
-  product={product}
-
-/>
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         )}
       </section>
 
-
-
       {/* Floating WhatsApp */}
-
       <a
         href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
           "Hello RaviXMobile, I would like to know more about your products."
@@ -752,9 +432,9 @@ function Shop() {
         target="_blank"
         rel="noreferrer"
         aria-label="Contact RaviXMobile on WhatsApp"
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_15px_45px_rgba(37,211,102,0.35)] transition hover:scale-105"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white transition hover:brightness-105"
       >
-        <WhatsAppIcon />
+        <MessageCircle size={26} />
       </a>
     </main>
   );

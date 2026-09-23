@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Menu, X,ShoppingCart } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../assets/Logo.png";
 
@@ -15,55 +15,38 @@ function Header() {
     { name: "Contact", href: "/contact" },
   ];
 
-  const isActive = (href) => {
-    if (href === "/") {
-      return location.pathname === "/";
-    }
+  const isActive = (href) =>
+    href === "/" ? location.pathname === "/" : location.pathname.startsWith(href);
 
-    return location.pathname.startsWith(href);
-  };
+  // Close the mobile menu on route change so it doesn't stay open after navigating.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#05080B] border-b border-white/5">
-      <nav className="max-w-[1360px] mx-auto h-[92px] px-6 md:px-10 flex items-center justify-between">
-        {/* Logo */}
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/[0.06] bg-[#05080B]/95 backdrop-blur-sm">
+      <nav className="mx-auto flex h-20 max-w-[1360px] items-center justify-between px-6 md:px-10">
         <Link to="/" className="flex items-center gap-3">
-          <img
-            src={Logo}
-            alt="RaviX Logo"
-            className="w-12 h-12 rounded-2xl object-contain shadow-[0_0_25px_rgba(32,191,255,0.35)]"
-          />
-
-          <div>
-            <h1 className="text-white font-bold text-xl leading-none">
-              Ravi<span className="text-[#20BFFF]">X</span>
-            </h1>
-            <p className="mt-2 text-[11px] tracking-[0.35em] text-gray-400 uppercase">
-              Mobile Accessories
-            </p>
-          </div>
+          <img src={Logo} alt="RaviX Logo" className="h-10 w-10 rounded-xl object-contain" />
+          <span className="text-lg font-bold leading-none text-white">
+            Ravi<span className="text-cyan-300">X</span>
+          </span>
         </Link>
 
-        {/* Desktop Menu */}
-        <ul className="hidden md:flex items-center gap-8">
+        {/* Desktop menu */}
+        <ul className="hidden items-center gap-9 md:flex">
           {links.map((link) => {
             const active = isActive(link.href);
-
             return (
               <li key={link.name}>
                 <Link
                   to={link.href}
-                  className={`relative pb-4 text-[15px] font-medium transition-colors ${
-                    active
-                      ? "text-[#20BFFF]"
-                      : "text-gray-400 hover:text-[#20BFFF]"
+                  aria-current={active ? "page" : undefined}
+                  className={`text-sm font-medium transition-colors ${
+                    active ? "text-cyan-300" : "text-gray-400 hover:text-white"
                   }`}
                 >
                   {link.name}
-
-                  {active && (
-                    <span className="absolute left-0 right-0 -bottom-0 h-[2px] bg-[#20BFFF] rounded-full" />
-                  )}
                 </Link>
               </li>
             );
@@ -71,52 +54,50 @@ function Header() {
         </ul>
 
         {/* Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           <Link
             to="/shop"
-            className="relative text-white hover:text-[#20BFFF] transition-colors"
             aria-label="Browse shop"
+            className="text-gray-300 transition-colors hover:text-cyan-300"
           >
-            <ShoppingCart size={22} strokeWidth={2} />
+            <ShoppingCart size={21} strokeWidth={2} />
           </Link>
 
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden text-white hover:text-[#20BFFF] transition-colors"
-            aria-label="Toggle menu"
+            onClick={() => setMobileOpen((open) => !open)}
+            className="text-gray-300 transition-colors hover:text-cyan-300 md:hidden"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X size={26} /> : <Menu size={26} />}
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
-      {mobileOpen && (
-        <div className="md:hidden bg-[#05080B] border-t border-white/10 px-6 pb-6">
-          <ul className="flex flex-col gap-1">
-            {links.map((link) => {
-              const active = isActive(link.href);
-
-              return (
-                <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`block py-4 text-base font-medium border-b border-white/5 ${
-                      active
-                        ? "text-[#20BFFF]"
-                        : "text-gray-400 hover:text-[#20BFFF]"
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
+      {/* Mobile menu */}
+      <div
+        className={`overflow-hidden border-t border-white/[0.06] bg-[#05080B] transition-[max-height] duration-200 ease-out md:hidden ${
+          mobileOpen ? "max-h-80" : "max-h-0 border-t-0"
+        }`}
+      >
+        <ul className="flex flex-col px-6">
+          {links.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <li key={link.name} className="border-b border-white/[0.06] last:border-none">
+                <Link
+                  to={link.href}
+                  className={`block py-4 text-base font-medium ${
+                    active ? "text-cyan-300" : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </header>
   );
 }

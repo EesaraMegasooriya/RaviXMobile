@@ -70,18 +70,21 @@ function Footer() {
     <footer className="relative bg-[#05080B] border-t border-white/10 text-white overflow-hidden">
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:64px_64px] opacity-60 pointer-events-none" />
 
-      <div className="relative max-w-[1360px] mx-auto px-6 md:px-10 py-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Brand column gets more room than the three link columns — it carries
+          the logo, tagline and socials, which need more breathing space than
+          a list of links does. */}
+      <div className="relative max-w-[1360px] mx-auto px-6 md:px-10 py-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
         <div>
           <a href="/" className="flex items-center gap-3">
             <img
               src={Logo}
               alt="RaviX Logo"
-              className="w-12 h-12 rounded-2xl object-contain shadow-[0_0_25px_rgba(32,191,255,0.35)]"
+              className="w-12 h-12 rounded-2xl object-contain border border-white/10"
             />
 
             <div>
               <h2 className="text-white font-bold text-xl leading-none">
-                Ravi<span className="text-[#20BFFF]">X</span>
+                Ravi<span className="text-cyan-300">X</span>
               </h2>
               <p className="mt-2 text-[11px] tracking-[0.35em] text-gray-400 uppercase">
                 Mobile Accessories
@@ -102,7 +105,7 @@ function Footer() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={label}
-                className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:text-[#20BFFF] hover:border-[#20BFFF] hover:shadow-[0_0_20px_rgba(32,191,255,0.25)] transition"
+                className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:text-cyan-300 hover:border-cyan-400/40 transition"
               >
                 <Icon />
               </a>
@@ -115,7 +118,7 @@ function Footer() {
           <ul className="space-y-3 text-gray-400">
             {quickLinks.map(([label, href]) => (
               <li key={href}>
-                <a href={href} className="hover:text-[#20BFFF] transition">
+                <a href={href} className="hover:text-cyan-300 transition">
                   {label}
                 </a>
               </li>
@@ -130,7 +133,7 @@ function Footer() {
               <li key={category}>
                 <a
                   href="/categories"
-                  className="hover:text-[#20BFFF] transition"
+                  className="hover:text-cyan-300 transition"
                 >
                   {category}
                 </a>
@@ -143,23 +146,23 @@ function Footer() {
           <h4 className="font-bold text-lg mb-6">Contact</h4>
           <ul className="space-y-4 text-gray-400">
             <li className="flex gap-4">
-              <MapPin size={19} className="text-[#20BFFF] shrink-0 mt-1" />
+              <MapPin size={19} className="text-cyan-300 shrink-0 mt-1" />
               <span>Gampaha, Sri Lanka</span>
             </li>
             <li className="flex gap-4">
-              <Phone size={18} className="text-[#20BFFF] shrink-0 mt-1" />
+              <Phone size={18} className="text-cyan-300 shrink-0 mt-1" />
               <a
                 href="tel:0703280480"
-                className="hover:text-[#20BFFF] transition"
+                className="hover:text-cyan-300 transition"
               >
                 070 328 0480
               </a>
             </li>
             <li className="flex gap-4">
-              <Mail size={18} className="text-[#20BFFF] shrink-0 mt-1" />
+              <Mail size={18} className="text-cyan-300 shrink-0 mt-1" />
               <a
                 href="mailto:ravixmobile.lk@gmail.com"
-                className="hover:text-[#20BFFF] transition break-all"
+                className="hover:text-cyan-300 transition break-all"
               >
                 ravixmobile.lk@gmail.com
               </a>
@@ -180,7 +183,7 @@ function Footer() {
               href="https://www.nexonick.com"
               target="_blank"
               rel="noreferrer"
-              className="text-[#20BFFF] hover:underline"
+              className="text-cyan-300 hover:underline"
             >
               nexonick Solutions
             </a>
