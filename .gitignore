@@ -6,3 +6,5 @@ dist/
 .DS_Store
 *.log
 backend/uploads/
+backend/node_modules/
+frontend/node_modules/
