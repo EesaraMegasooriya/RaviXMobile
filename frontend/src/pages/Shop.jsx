@@ -1,3 +1,6 @@
+import ServiceError from "../components/ServiceError";
+import ProductPrice, { Availability } from "../components/ProductPrice";
+import { pricing, availabilityOf, purchaseLabel, whatsappProductUrl } from "../lib/products";
 import {
   useEffect,
   useMemo,
@@ -5,17 +8,8 @@ import {
 } from "react";
 import axios from "axios";
 
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { API_BASE_URL, WHATSAPP_NUMBER, getProductImageUrl } from "../lib/api";
-
-const formatPrice = (price) => {
-  const numericPrice = Number(price || 0);
-
-  return `LKR ${numericPrice.toLocaleString("en-LK", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  })}`;
-};
 
 /* -------------------------------------------------------------------------- */
 /*                                   Icons                                    */
@@ -172,7 +166,6 @@ function ProductImage({ product }) {
 
 function ProductCard({
   product,
-  onBuyNow,
 }) {
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.045] shadow-[0_20px_70px_rgba(0,0,0,0.3)] backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-cyan-400/40 hover:shadow-[0_20px_70px_rgba(0,190,255,0.12)]">
@@ -210,26 +203,20 @@ function ProductCard({
         </div>
 
         <h3 className="line-clamp-2 min-h-[52px] text-lg font-bold leading-6 text-white">
-          {product.name}
+          <Link to={`/products/${product._id}`} className="hover:text-cyan-400">{product.name}</Link>
         </h3>
+        <div className="mt-3"><Availability product={product} /></div>
 
         <div className="mt-auto pt-6">
           <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
             Price
           </p>
 
-          <p className="mt-1 text-2xl font-black text-white">
-            {formatPrice(product.price)}
-          </p>
-
-          <button
-            type="button"
-            onClick={() => onBuyNow(product)}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3.5 text-sm font-extrabold text-white transition duration-300 hover:bg-[#20bd5a] hover:shadow-[0_12px_35px_rgba(37,211,102,0.25)]"
-          >
-            <WhatsAppIcon className="h-5 w-5" />
-            Buy Now
-          </button>
+          <ProductPrice product={product} />
+          <Link to={`/products/${product._id}`} className="mt-3 inline-block text-sm text-cyan-400 underline">View details</Link>
+          <a href={whatsappProductUrl(product, { phone: WHATSAPP_NUMBER, origin: window.location.origin })} target="_blank" rel="noreferrer" className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3.5 text-sm font-extrabold text-black transition hover:bg-[#20bd5a]">
+            <WhatsAppIcon className="h-5 w-5" />{purchaseLabel(product)}
+          </a>
         </div>
       </div>
     </article>
@@ -248,6 +235,8 @@ function Shop() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] =
     useState(searchParams.get("category") || "");
+  const [onSaleOnly, setOnSaleOnly] = useState(searchParams.get("sale") === "true");
+  const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
 
   const [showMobileFilters, setShowMobileFilters] =
@@ -257,7 +246,7 @@ function Shop() {
   const [errorMessage, setErrorMessage] =
     useState("");
 
- 
+
 
   const fetchShopData = async () => {
     try {
@@ -280,10 +269,7 @@ function Shop() {
     } catch (error) {
       console.error("Unable to load shop:", error);
 
-      setErrorMessage(
-        error.response?.data?.message ||
-          "Unable to load products. Please check the backend connection."
-      );
+      setErrorMessage("Something went wrong. Please contact RaviX Mobile for help.");
     } finally {
       setLoading(false);
     }
@@ -305,6 +291,8 @@ function Shop() {
       .toLowerCase();
 
     const filtered = products.filter((product) => {
+      if (onSaleOnly && !pricing(product).discounted) return false;
+      if (inStockOnly && availabilityOf(product) !== "in_stock") return false;
       const matchesCategory =
         !selectedCategory ||
         product.category === selectedCategory;
@@ -322,6 +310,7 @@ function Shop() {
         product.name,
         product.category,
         product.badge,
+        product.description,
       ]
         .filter(Boolean)
         .join(" ")
@@ -337,14 +326,14 @@ function Shop() {
         switch (sortBy) {
           case "price-low":
             return (
-              Number(firstProduct.price || 0) -
-              Number(secondProduct.price || 0)
+              pricing(firstProduct).current -
+              pricing(secondProduct).current
             );
 
           case "price-high":
             return (
-              Number(secondProduct.price || 0) -
-              Number(firstProduct.price || 0)
+              pricing(secondProduct).current -
+              pricing(firstProduct).current
             );
 
           case "rating":
@@ -378,50 +367,21 @@ function Shop() {
     searchTerm,
     selectedCategory,
     sortBy,
+    onSaleOnly,
+    inStockOnly,
   ]);
-
-  const handleBuyNow = (product) => {
-  const productImage = getProductImageUrl(product.img);
-
-  const message = [
-    "Hello RaviXMobile,",
-    "",
-    "I am interested in purchasing this product:",
-    "",
-    `Product: ${product.name}`,
-    `Brand: ${product.brand || "N/A"}`,
-    `Category: ${product.category || "N/A"}`,
-    `Price: ${formatPrice(product.price)}`,
-    `Rating: ${Number(product.rating || 0).toFixed(1)} / 5`,
-    "",
-    productImage
-      ? `Product image: ${productImage}`
-      : "",
-    "",
-    "Please let me know whether this product is available and how I can place the order.",
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    message
-  )}`;
-
-  window.open(
-    whatsappUrl,
-    "_blank",
-    "noopener,noreferrer"
-  );
-};
 
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedCategory("");
     setSortBy("newest");
+    setOnSaleOnly(false);
+    setInStockOnly(false);
   };
 
   const hasActiveFilters =
     searchTerm ||
+    onSaleOnly || inStockOnly ||
     selectedCategory ||
     sortBy !== "newest";
 
@@ -446,7 +406,7 @@ function Shop() {
 
       {/* Navigation */}
 
-     
+
 
       {/* Hero */}
 
@@ -484,7 +444,7 @@ function Shop() {
                 <span className="font-bold text-white">
                   {products.length}
                 </span>{" "}
-                products available
+                products in the catalog
               </p>
             </div>
           </div>
@@ -560,6 +520,7 @@ function Shop() {
             </button>
 
             <select
+              aria-label="Sort products"
               value={sortBy}
               onChange={(event) =>
                 setSortBy(event.target.value)
@@ -588,6 +549,11 @@ function Shop() {
             </select>
           </div>
 
+      <div className="mt-5 flex flex-wrap gap-6 text-sm">
+        <label className="flex items-center gap-2"><input type="checkbox" checked={onSaleOnly} onChange={e => setOnSaleOnly(e.target.checked)} />On sale</label>
+        <label className="flex items-center gap-2"><input type="checkbox" checked={inStockOnly} onChange={e => setInStockOnly(e.target.checked)} />In stock only</label>
+      </div>
+
           {/* Mobile controls */}
 
           {showMobileFilters && (
@@ -597,6 +563,7 @@ function Shop() {
               </label>
 
               <select
+                aria-label="Sort products"
                 value={sortBy}
                 onChange={(event) =>
                   setSortBy(event.target.value)
@@ -737,23 +704,7 @@ function Shop() {
             </p>
           </div>
         ) : errorMessage ? (
-          <div className="mt-8 rounded-[24px] border border-red-400/20 bg-red-500/10 px-6 py-14 text-center">
-            <p className="text-lg font-bold text-red-300">
-              Unable to load the shop
-            </p>
-
-            <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-400">
-              {errorMessage}
-            </p>
-
-            <button
-              type="button"
-              onClick={fetchShopData}
-              className="mt-6 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-extrabold text-[#031015] transition hover:bg-cyan-300"
-            >
-              Try again
-            </button>
-          </div>
+          <div className="mt-8"><ServiceError onRetry={fetchShopData} /></div>
         ) : filteredProducts.length === 0 ? (
           <div className="mt-8 flex min-h-[360px] flex-col items-center justify-center rounded-[24px] border border-white/10 bg-white/[0.035] px-6 text-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.04] text-slate-500">
@@ -783,14 +734,14 @@ function Shop() {
               <ProductCard
   key={product._id}
   product={product}
-  onBuyNow={handleBuyNow}
+
 />
             ))}
           </div>
         )}
       </section>
 
-      
+
 
       {/* Floating WhatsApp */}
 

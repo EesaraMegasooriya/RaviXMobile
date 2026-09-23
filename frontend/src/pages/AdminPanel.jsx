@@ -1,3 +1,4 @@
+import ProductPrice, { Availability } from "../components/ProductPrice";
 import HeroSettings from "../components/HeroSettings";
 import Reviews from "../components/Reviews";
 import ProductImage from "../components/ProductImage";
@@ -16,6 +17,9 @@ const initialFormData = {
   name: "",
   category: "",
   price: "",
+  salePrice: "",
+  availability: "in_stock",
+  description: "",
   rating: "",
   badge: "",
   img: "",
@@ -141,7 +145,7 @@ function AdminPanel() {
     } catch (error) {
       handleRequestError(
         error,
-        "Unable to load products. Check the backend connection."
+        "Something went wrong. Please try again or contact RaviX Mobile for help."
       );
     } finally {
       setProductsLoading(false);
@@ -294,7 +298,7 @@ function AdminPanel() {
     } catch (error) {
       setErrorMessage(
         error.response?.data?.message ||
-          "Unable to log in. Check the backend connection."
+          "Something went wrong. Please try again or contact RaviX Mobile for help."
       );
     } finally {
       setLoginLoading(false);
@@ -355,6 +359,7 @@ function AdminPanel() {
       return "Rating must be between 0 and 5.";
     }
 
+    if (formData.salePrice !== '' && (!Number.isFinite(Number(formData.salePrice)) || Number(formData.salePrice) < 0 || Number(formData.salePrice) >= Number(formData.price))) return 'Sale price must be lower than the regular price.';
     if (!getProductImageUrl(formData.img)) {
       return "Enter a valid HTTP or HTTPS image link.";
     }
@@ -379,6 +384,7 @@ function AdminPanel() {
       name: formData.name.trim(),
       img: formData.img.trim(),
       price: Number(formData.price),
+      salePrice: formData.salePrice === "" ? null : Number(formData.salePrice),
       rating: Number(formData.rating || 0),
     };
 
@@ -449,6 +455,9 @@ function AdminPanel() {
       name: product.name || "",
       category: product.category || "",
       price: product.price ?? "",
+      salePrice: product.salePrice ?? "",
+      availability: product.availability || "in_stock",
+      description: product.description || "",
       rating: product.rating ?? "",
       badge: product.badge || "",
       img: product.img || "",
@@ -960,6 +969,18 @@ function AdminPanel() {
                 )}
               </div>
 
+              <label className="block text-sm font-semibold text-slate-700">Description / specifications
+                <textarea aria-label="Description / specifications" name="description" value={formData.description} onChange={handleInputChange} maxLength={3000} rows={4} className="mt-2 w-full rounded-xl border border-slate-300 p-3" placeholder="Features, compatibility, included accessories..." />
+              </label>
+              <label className="block text-sm font-semibold text-slate-700">Availability
+                <select aria-label="Availability" name="availability" value={formData.availability} onChange={handleInputChange} className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3">
+                  <option value="in_stock">In stock</option><option value="out_of_stock">Out of stock</option><option value="pre_order">Pre-order</option>
+                </select>
+              </label>
+              <label className="block text-sm font-semibold text-slate-700">Sale price (LKR, optional)
+                <input type="number" name="salePrice" value={formData.salePrice} onChange={handleInputChange} min="0" step="0.01" className="mt-2 w-full rounded-xl border border-slate-300 p-3" placeholder="Leave empty for no discount" />
+                <span className="mt-2 block text-xs font-normal text-slate-500">Keep the regular price below. Clear the sale price to remove the discount.</span>
+              </label>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-slate-700">
@@ -1165,9 +1186,9 @@ function AdminPanel() {
                 {filteredProducts.map((product) => (
                   <article
                     key={product._id}
-                    className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                    className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                   >
-                    <div className="relative h-52 bg-slate-100">
+                    <div className="relative h-52 shrink-0 bg-slate-100">
                       <ProductImage
                         src={getProductImageUrl(
                           product.img
@@ -1195,7 +1216,7 @@ function AdminPanel() {
                       </span>
                     </div>
 
-                    <div className="p-5">
+                    <div className="flex min-w-0 flex-1 flex-col p-5">
                       <p className="text-xs font-bold uppercase tracking-wider text-blue-600">
                         {product.brand}
                       </p>
@@ -1205,7 +1226,7 @@ function AdminPanel() {
                           "No category"}
                       </p>
 
-                      <h3 className="mt-2 min-h-12 font-bold text-slate-900">
+                      <h3 className="mt-2 min-h-12 break-words font-bold text-slate-900">
                         {product.name}
                       </h3>
 
@@ -1215,12 +1236,8 @@ function AdminPanel() {
                             Price
                           </p>
 
-                          <p className="text-lg font-extrabold text-slate-900">
-                            LKR{" "}
-                            {Number(
-                              product.price || 0
-                            ).toLocaleString()}
-                          </p>
+                          <ProductPrice product={product} />
+                          <div className="mt-2"><Availability product={product} /></div>
                         </div>
 
                         <p className="rounded-lg bg-amber-50 px-3 py-2 font-bold text-amber-600">
@@ -1228,7 +1245,7 @@ function AdminPanel() {
                         </p>
                       </div>
 
-                      <div className="mt-5 grid grid-cols-2 gap-3">
+                      <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
                         <button
                           type="button"
                           onClick={() =>

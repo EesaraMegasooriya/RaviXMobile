@@ -1,4 +1,8 @@
+import { Link } from "react-router-dom";
+import ProductPrice, { Availability } from "../components/ProductPrice";
+import { purchaseLabel, whatsappProductUrl } from "../lib/products";
 import Reviews from "../components/Reviews";
+import ServiceError from "../components/ServiceError";
 import ProductImage from "../components/ProductImage";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -9,7 +13,6 @@ import {
   ShieldCheck,
   Headphones,
   Sparkles,
-  ShoppingCart,
   Star,
   Smartphone,
   MoveUpRight,
@@ -41,7 +44,7 @@ function Home() {
       setProducts(productsResult.data.products.slice(0, 8));
       setCatalogCategories(categoriesResult.data.categories);
     }).catch(error => {
-      if (!axios.isCancel(error)) setError('Unable to load the collection. Visit the shop to try again.');
+      if (!axios.isCancel(error)) setError('Something went wrong. Please try again in a moment, or contact RaviX Mobile for help.');
     }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, []);
@@ -68,7 +71,7 @@ function Home() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/5 px-4 py-2 text-sm text-cyan-400 mb-8">
               <Sparkles size={15} />
-              New collection 2026 — up to 30% off
+              Explore our latest collection
             </div>
 
             <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.05] tracking-tight">
@@ -183,15 +186,15 @@ function Home() {
         </div>
 
         {loading && <p role="status" className="mb-6 text-gray-400">Loading products...</p>}
-        {error && <p role="alert" className="mb-6 text-gray-400">{error} <a href="/shop" className="text-cyan-400">Open shop →</a></p>}
+        {error && <div className="mb-6"><ServiceError message={error} onRetry={() => window.location.reload()} /></div>}
         {!loading && !error && products.length === 0 && <p className="text-gray-400">Our collection is being updated. Please check back soon.</p>}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((p) => (
             <div
               key={p._id}
-              className="group overflow-hidden rounded-2xl bg-[#090D14] border border-white/10 hover:border-cyan-400/40 transition"
+              className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-[#090D14] border border-white/10 hover:border-cyan-400/40 transition"
             >
-              <div className="relative h-[330px] bg-black">
+              <div className="relative h-[280px] shrink-0 bg-black sm:h-[330px]">
                 <ProductImage
                   src={getProductImageUrl(p.img)}
                   alt={p.name}
@@ -205,32 +208,22 @@ function Home() {
                 )}
               </div>
 
-              <div className="p-6">
-                <div className="flex justify-between items-center text-sm text-gray-400">
-                  <span className="tracking-widest">{p.brand}</span>
-                  <span className="flex items-center gap-1">
+              <div className="flex min-w-0 flex-1 flex-col p-6">
+                <div className="flex items-start justify-between gap-3 text-sm text-gray-400">
+                  <span className="min-w-0 break-words tracking-widest">{p.brand}</span>
+                  <span className="flex shrink-0 items-center gap-1">
                     <Star size={15} className="fill-cyan-400 text-cyan-400" />
                     {p.rating}
                   </span>
                 </div>
 
-                <h3 className="mt-4 font-bold text-lg">{p.name}</h3>
+                <h3 className="mt-4 min-h-14 break-words text-lg font-bold leading-7"><Link to={`/products/${p._id}`} className="hover:text-cyan-400">{p.name}</Link></h3>
+                <div className="mt-3"><Availability product={p} /></div>
 
-                <div className="mt-14 flex items-center justify-between">
-                  <div>
-                    <span className="text-2xl font-bold text-cyan-400">
-                      {`LKR ${Number(p.price).toLocaleString("en-LK")}`}
-                    </span>
-                    {p.oldPrice && (
-                      <span className="ml-2 text-sm text-gray-500 line-through">
-                        {p.oldPrice}
-                      </span>
-                    )}
-                  </div>
-
-                  <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hello RaviXMobile, I would like to order ${p.name} (${p.brand}) for LKR ${p.price}. Image: ${p.img}`)}`} target="_blank" rel="noreferrer" aria-label={`Order ${p.name} on WhatsApp`} className="w-11 h-11 rounded-full bg-cyan-400 text-black flex items-center justify-center hover:bg-cyan-300 transition">
-                    <ShoppingCart size={19} />
-                  </a>
+                <div className="mt-auto space-y-4 pt-6">
+                  <ProductPrice product={p} />
+                  <Link to={`/products/${p._id}`} className="block text-sm text-cyan-400 underline">View details</Link>
+                  <a href={whatsappProductUrl(p, { phone: WHATSAPP_NUMBER, origin: window.location.origin })} target="_blank" rel="noreferrer" className="flex items-center justify-center rounded-xl bg-cyan-400 px-4 py-3 font-semibold text-black hover:bg-cyan-300">{purchaseLabel(p)}</a>
                 </div>
               </div>
             </div>
@@ -246,30 +239,29 @@ function Home() {
           <div className="relative grid md:grid-cols-2 gap-10 items-center">
             <div>
               <span className="inline-block rounded-full bg-cyan-400 text-black px-4 py-2 text-xs font-extrabold">
-                LIMITED OFFER
+                SHOP OFFERS
               </span>
 
               <h2 className="mt-6 text-4xl md:text-5xl font-extrabold leading-tight">
-                Save up to <span className="text-cyan-400">30% off</span>
+                Discover our <span className="text-cyan-400">latest deals</span>
                 <br />
                 on premium accessories
               </h2>
 
               <p className="mt-6 text-gray-400 text-lg">
-                Bundle deals on earbuds, chargers, and smartwatches. Limited
-                stock — ends this month.
+                Browse current discounts on our mobile accessories. Availability and offers are shown on each product.
               </p>
 
               <a
-                href="/shop"
+                href="/shop?sale=true"
                 className="mt-7 inline-flex items-center gap-3 rounded-full bg-cyan-400 px-8 py-4 text-black font-semibold hover:bg-cyan-300 transition"
               >
-                Grab the deal <ArrowRight size={18} />
+                View discounted products <ArrowRight size={18} />
               </a>
             </div>
 
             <div className="hidden md:block text-right text-[10rem] leading-none font-black text-cyan-400">
-              30%
+              Sale
             </div>
           </div>
         </div>

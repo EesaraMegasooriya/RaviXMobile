@@ -21,6 +21,23 @@ export function productInput(body, partial = false) {
     if (!['string', 'number'].includes(typeof value) || String(value).trim() === '' || !Number.isFinite(Number(value)) || Number(value) < 0 || (key === 'rating' && Number(value) > 5)) fail(`Invalid ${key}.`);
     result[key] = Number(value);
   }
+  if (body.salePrice !== undefined) {
+    if (body.salePrice === null || body.salePrice === '') result.salePrice = null;
+    else {
+      const value = body.salePrice;
+      if (!['string', 'number'].includes(typeof value) || String(value).trim() === '' || !Number.isFinite(Number(value)) || Number(value) < 0) fail('Invalid sale price.');
+      result.salePrice = Number(value);
+    }
+  }
+  if (result.salePrice != null && result.price !== undefined && result.salePrice >= result.price) fail('Sale price must be lower than the regular price.');
+  if (body.availability !== undefined) {
+    if (!['in_stock', 'out_of_stock', 'pre_order'].includes(body.availability)) fail('Invalid availability.');
+    result.availability = body.availability;
+  }
+  if (body.description !== undefined) {
+    if (typeof body.description !== 'string' || body.description.trim().length > 3000) fail('Description must be at most 3000 characters.');
+    result.description = body.description.trim();
+  }
   if (body.badge !== undefined) {
     if (!['', 'New', 'Sale', 'Hot', 'Best Seller'].includes(body.badge)) fail('Invalid badge.');
     result.badge = body.badge;

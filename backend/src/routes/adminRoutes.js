@@ -1,6 +1,6 @@
 import { createReviewRateLimit } from "../middleware/reviewRateLimit.js";
 import { getSettings, updateSettings } from "../controllers/siteController.js";
-import { deleteReview } from "../controllers/reviewController.js";
+import { deleteReview, replyToReview, deleteReviewReply } from "../controllers/reviewController.js";
 import express from "express";
 
 import { loginAdmin } from "../controllers/adminAuthController.js";
@@ -27,6 +27,8 @@ router.post("/login", createReviewRateLimit({ max: 15, message: "Too many login 
 router.get("/settings", protectAdmin, getSettings);
 router.put("/settings", protectAdmin, updateSettings);
 router.delete("/reviews/:id", protectAdmin, deleteReview);
+router.put("/reviews/:id/reply", protectAdmin, replyToReview);
+router.delete("/reviews/:id/reply", protectAdmin, deleteReviewReply);
 
 /* Categories */
 
