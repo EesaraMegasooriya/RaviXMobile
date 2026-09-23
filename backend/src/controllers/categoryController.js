@@ -16,7 +16,10 @@ export const getCategories = async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      categories,
+      categories: await Promise.all(categories.map(async (category) => ({
+        ...category.toObject(),
+        productCount: await Product.countDocuments({ category: category.name, ...(req.admin ? {} : { isActive: true }) }),
+      }))),
     });
   } catch (error) {
     next(error);
@@ -25,7 +28,7 @@ export const getCategories = async (req, res, next) => {
 
 export const createCategory = async (req, res, next) => {
   try {
-    const name = req.body.name?.trim();
+    const name = typeof req.body?.name === "string" ? req.body.name.trim() : "";
 
     if (!name) {
       return res.status(400).json({

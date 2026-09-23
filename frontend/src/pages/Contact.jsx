@@ -19,7 +19,7 @@ function Contact() {
     {
       title: "Location",
       value: "Gampaha, Sri Lanka",
-      href: "https://www.google.com/maps/search/?api=1&query=Gampaha,Sri+Lanka",
+      href: "https://share.google/CFlGAfNpskxLBe87z",
       icon: MapPin,
     },
   ];

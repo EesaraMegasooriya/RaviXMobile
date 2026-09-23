@@ -1,3 +1,6 @@
+import HeroSettings from "../components/HeroSettings";
+import Reviews from "../components/Reviews";
+import ProductImage from "../components/ProductImage";
 import {
   useCallback,
   useEffect,
@@ -6,14 +9,7 @@ import {
 } from "react";
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5001/api";
-
-const SERVER_BASE_URL = API_BASE_URL.replace(
-  /\/api\/?$/,
-  ""
-);
+import { API_BASE_URL, getProductImageUrl } from "../lib/api";
 
 const initialFormData = {
   brand: "",
@@ -22,23 +18,8 @@ const initialFormData = {
   price: "",
   rating: "",
   badge: "",
+  img: "",
   isActive: true,
-};
-
-const getProductImageUrl = (imagePath) => {
-  if (!imagePath) {
-    return "";
-  }
-
-  if (
-    imagePath.startsWith("http://") ||
-    imagePath.startsWith("https://") ||
-    imagePath.startsWith("blob:")
-  ) {
-    return imagePath;
-  }
-
-  return `${SERVER_BASE_URL}${imagePath}`;
 };
 
 function AdminPanel() {
@@ -63,11 +44,7 @@ function AdminPanel() {
   const [newCategoryName, setNewCategoryName] =
     useState("");
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] =
-    useState("");
-  const [fileInputKey, setFileInputKey] =
-    useState(0);
+  const imagePreview = getProductImageUrl(formData.img);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] =
@@ -110,8 +87,6 @@ function AdminPanel() {
     setCategories([]);
     setEditingProductId(null);
     setFormData(initialFormData);
-    setImageFile(null);
-    setImagePreview("");
     setCategoryFilter("");
     setSearchTerm("");
   }, []);
@@ -217,17 +192,11 @@ function AdminPanel() {
 
   useEffect(() => {
     if (adminToken) {
+      // Initial API synchronization also sets the loading indicators.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       refreshData();
     }
   }, [adminToken, refreshData]);
-
-  useEffect(() => {
-    return () => {
-      if (imagePreview.startsWith("blob:")) {
-        URL.revokeObjectURL(imagePreview);
-      }
-    };
-  }, [imagePreview]);
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = searchTerm
@@ -349,61 +318,10 @@ function AdminPanel() {
     clearMessages();
   };
 
-  const handleImageChange = (event) => {
-    const selectedFile = event.target.files?.[0];
-
-    if (!selectedFile) {
-      return;
-    }
-
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-    ];
-
-    if (!allowedTypes.includes(selectedFile.type)) {
-      setErrorMessage(
-        "Select a JPG, PNG or WEBP image."
-      );
-
-      event.target.value = "";
-      return;
-    }
-
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      setErrorMessage(
-        "The image must be smaller than 5 MB."
-      );
-
-      event.target.value = "";
-      return;
-    }
-
-    if (imagePreview.startsWith("blob:")) {
-      URL.revokeObjectURL(imagePreview);
-    }
-
-    setImageFile(selectedFile);
-    setImagePreview(
-      URL.createObjectURL(selectedFile)
-    );
-
-    clearMessages();
-  };
-
   const resetForm = () => {
-    if (imagePreview.startsWith("blob:")) {
-      URL.revokeObjectURL(imagePreview);
-    }
 
     setFormData(initialFormData);
-    setImageFile(null);
-    setImagePreview("");
     setEditingProductId(null);
-    setFileInputKey(
-      (currentKey) => currentKey + 1
-    );
 
     clearMessages();
   };
@@ -423,6 +341,7 @@ function AdminPanel() {
 
     if (
       formData.price === "" ||
+      !Number.isFinite(Number(formData.price)) ||
       Number(formData.price) < 0
     ) {
       return "Enter a valid product price.";
@@ -430,14 +349,14 @@ function AdminPanel() {
 
     if (
       formData.rating !== "" &&
-      (Number(formData.rating) < 0 ||
+      (!Number.isFinite(Number(formData.rating)) || Number(formData.rating) < 0 ||
         Number(formData.rating) > 5)
     ) {
       return "Rating must be between 0 and 5.";
     }
 
-    if (!editingProductId && !imageFile) {
-      return "Please select a product image.";
+    if (!getProductImageUrl(formData.img)) {
+      return "Enter a valid HTTP or HTTPS image link.";
     }
 
     return null;
@@ -454,46 +373,14 @@ function AdminPanel() {
       return;
     }
 
-    const productPayload = new FormData();
-
-    productPayload.append(
-      "brand",
-      formData.brand.trim()
-    );
-
-    productPayload.append(
-      "name",
-      formData.name.trim()
-    );
-
-    productPayload.append(
-      "category",
-      formData.category
-    );
-
-    productPayload.append(
-      "price",
-      String(Number(formData.price))
-    );
-
-    productPayload.append(
-      "rating",
-      String(Number(formData.rating || 0))
-    );
-
-    productPayload.append(
-      "badge",
-      formData.badge
-    );
-
-    productPayload.append(
-      "isActive",
-      String(formData.isActive)
-    );
-
-    if (imageFile) {
-      productPayload.append("img", imageFile);
-    }
+    const productPayload = {
+      ...formData,
+      brand: formData.brand.trim(),
+      name: formData.name.trim(),
+      img: formData.img.trim(),
+      price: Number(formData.price),
+      rating: Number(formData.rating || 0),
+    };
 
     try {
       setFormSubmitting(true);
@@ -554,9 +441,6 @@ function AdminPanel() {
   };
 
   const handleEditProduct = (product) => {
-    if (imagePreview.startsWith("blob:")) {
-      URL.revokeObjectURL(imagePreview);
-    }
 
     setEditingProductId(product._id);
 
@@ -567,18 +451,12 @@ function AdminPanel() {
       price: product.price ?? "",
       rating: product.rating ?? "",
       badge: product.badge || "",
+      img: product.img || "",
       isActive: product.isActive ?? true,
     });
 
-    setImageFile(null);
 
-    setImagePreview(
-      getProductImageUrl(product.img)
-    );
 
-    setFileInputKey(
-      (currentKey) => currentKey + 1
-    );
 
     clearMessages();
 
@@ -783,6 +661,7 @@ function AdminPanel() {
 
               <input
                 type="email"
+                aria-label="Email"
                 name="email"
                 autoComplete="username"
                 value={loginData.email}
@@ -799,6 +678,7 @@ function AdminPanel() {
 
               <input
                 type="password"
+                aria-label="Password"
                 name="password"
                 autoComplete="current-password"
                 value={loginData.password}
@@ -868,16 +748,19 @@ function AdminPanel() {
         </section>
 
         {errorMessage && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
+          <div role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
             {errorMessage}
           </div>
         )}
 
         {successMessage && (
-          <div className="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-medium text-green-700">
+          <div role="status" className="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-medium text-green-700">
             {successMessage}
           </div>
         )}
+
+        <HeroSettings adminToken={adminToken} onAuthError={handleRequestError} />
+        <Reviews adminToken={adminToken} onAuthError={handleRequestError} />
 
         {/* Category management */}
 
@@ -1019,6 +902,7 @@ function AdminPanel() {
                 </label>
 
                 <input
+                  aria-label="Brand"
                   name="brand"
                   value={formData.brand}
                   onChange={handleInputChange}
@@ -1033,6 +917,7 @@ function AdminPanel() {
                 </label>
 
                 <input
+                  aria-label="Product name"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
@@ -1047,6 +932,7 @@ function AdminPanel() {
                 </label>
 
                 <select
+                  aria-label="Category"
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
@@ -1082,6 +968,7 @@ function AdminPanel() {
 
                   <input
                     type="number"
+                    aria-label="Price"
                     name="price"
                     min="0"
                     step="0.01"
@@ -1099,6 +986,7 @@ function AdminPanel() {
 
                   <input
                     type="number"
+                    aria-label="Rating"
                     name="rating"
                     min="0"
                     max="5"
@@ -1117,6 +1005,7 @@ function AdminPanel() {
                 </label>
 
                 <select
+                  aria-label="Badge"
                   name="badge"
                   value={formData.badge}
                   onChange={handleInputChange}
@@ -1134,28 +1023,30 @@ function AdminPanel() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  Product image
+                  Product image direct link
                 </label>
 
                 <input
-                  key={fileInputKey}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleImageChange}
+                  type="url"
+                  aria-label="Product image direct link"
+                  name="img"
+                  required
+                  value={formData.img}
+                  placeholder="https://example.com/product.jpg"
+                  onChange={handleInputChange}
                   className="block w-full rounded-xl border border-slate-300 p-3 text-sm"
                 />
 
                 {editingProductId && (
                   <p className="mt-2 text-xs text-slate-500">
-                    Leave empty to keep the existing
-                    image.
+                    Edit the link to replace the existing image.
                   </p>
                 )}
               </div>
 
               {imagePreview && (
                 <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                  <img
+                  <ProductImage
                     src={imagePreview}
                     alt="Product preview"
                     className="h-48 w-full object-contain p-3"
@@ -1277,7 +1168,7 @@ function AdminPanel() {
                     className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                   >
                     <div className="relative h-52 bg-slate-100">
-                      <img
+                      <ProductImage
                         src={getProductImageUrl(
                           product.img
                         )}

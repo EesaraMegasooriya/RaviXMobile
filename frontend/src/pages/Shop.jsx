@@ -5,32 +5,8 @@ import {
 } from "react";
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5001/api";
-
-const SERVER_BASE_URL = API_BASE_URL.replace(
-  /\/api\/?$/,
-  ""
-);
-
-const WHATSAPP_NUMBER = "94703280480";
-
-const getProductImageUrl = (imagePath) => {
-  if (!imagePath) {
-    return "";
-  }
-
-  if (
-    imagePath.startsWith("http://") ||
-    imagePath.startsWith("https://") ||
-    imagePath.startsWith("blob:")
-  ) {
-    return imagePath;
-  }
-
-  return `${SERVER_BASE_URL}${imagePath}`;
-};
+import { useSearchParams } from "react-router-dom";
+import { API_BASE_URL, WHATSAPP_NUMBER, getProductImageUrl } from "../lib/api";
 
 const formatPrice = (price) => {
   const numericPrice = Number(price || 0);
@@ -265,12 +241,13 @@ function ProductCard({
 /* -------------------------------------------------------------------------- */
 
 function Shop() {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] =
-    useState("");
+    useState(searchParams.get("category") || "");
   const [sortBy, setSortBy] = useState("newest");
 
   const [showMobileFilters, setShowMobileFilters] =
@@ -313,6 +290,8 @@ function Shop() {
   };
 
   useEffect(() => {
+    // Initial API synchronization also sets the loading indicators.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchShopData();
   }, []);
 
@@ -400,40 +379,6 @@ function Shop() {
     selectedCategory,
     sortBy,
   ]);
-
-  const handleAddToCart = (product) => {
-    setCart((currentCart) => {
-      const existingProduct = currentCart.find(
-        (item) => item._id === product._id
-      );
-
-      if (existingProduct) {
-        return currentCart.map((item) =>
-          item._id === product._id
-            ? {
-                ...item,
-                quantity:
-                  Number(item.quantity || 0) + 1,
-              }
-            : item
-        );
-      }
-
-      return [
-        ...currentCart,
-        {
-          ...product,
-          quantity: 1,
-        },
-      ];
-    });
-
-    setAddedProductId(product._id);
-
-    window.setTimeout(() => {
-      setAddedProductId(null);
-    }, 1200);
-  };
 
   const handleBuyNow = (product) => {
   const productImage = getProductImageUrl(product.img);

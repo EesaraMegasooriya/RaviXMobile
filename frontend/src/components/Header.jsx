@@ -72,17 +72,19 @@ function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
-          <button
+          <Link
+            to="/shop"
             className="relative text-white hover:text-[#20BFFF] transition-colors"
-            aria-label="Open cart"
+            aria-label="Browse shop"
           >
             <ShoppingCart size={22} strokeWidth={2} />
-          </button>
+          </Link>
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden text-white hover:text-[#20BFFF] transition-colors"
             aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X size={26} /> : <Menu size={26} />}
           </button>

@@ -1,14 +1,15 @@
 import jwt from "jsonwebtoken";
 
-// Hardcoded admin credentials
-const ADMIN_EMAIL = "admin@shop.com";
-const ADMIN_PASSWORD = "Admin@12345";
+
 
 export const loginAdmin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+    if (!ADMIN_EMAIL || !ADMIN_PASSWORD || !process.env.JWT_SECRET) return res.status(503).json({ success: false, message: "Admin login is not configured." });
 
-    if (!email || !password) {
+    if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required.",
@@ -49,7 +50,7 @@ export const loginAdmin = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Admin login error:", error);
+    console.error("Admin login error:", error.name);
 
     return res.status(500).json({
       success: false,

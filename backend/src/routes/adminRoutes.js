@@ -1,3 +1,6 @@
+import { createReviewRateLimit } from "../middleware/reviewRateLimit.js";
+import { getSettings, updateSettings } from "../controllers/siteController.js";
+import { deleteReview } from "../controllers/reviewController.js";
 import express from "express";
 
 import { loginAdmin } from "../controllers/adminAuthController.js";
@@ -16,11 +19,14 @@ import {
 } from "../controllers/categoryController.js";
 
 import { protectAdmin } from "../middleware/adminAuth.js";
-import { uploadProductImage } from "../middleware/productUpload.js";
+
 
 const router = express.Router();
 
-router.post("/login", loginAdmin);
+router.post("/login", createReviewRateLimit({ max: 15, message: "Too many login attempts. Please try again later." }), loginAdmin);
+router.get("/settings", protectAdmin, getSettings);
+router.put("/settings", protectAdmin, updateSettings);
+router.delete("/reviews/:id", protectAdmin, deleteReview);
 
 /* Categories */
 
@@ -53,14 +59,12 @@ router.get(
 router.post(
   "/products",
   protectAdmin,
-  uploadProductImage.single("img"),
   createProduct
 );
 
 router.put(
   "/products/:id",
   protectAdmin,
-  uploadProductImage.single("img"),
   updateProduct
 );
 

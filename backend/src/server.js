@@ -1,57 +1,39 @@
-import "dotenv/config";
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import app from './app.js';
+import { connectDatabase } from './config/database.js';
 
-import express from "express";
-import cors from "cors";
-import path from "path";
-
-import { connectDatabase } from "./config/database.js";
-import adminRoutes from "./routes/adminRoutes.js";
-import productRoutes from "./routes/productRoutes.js";
-import categoryRoutes from "./routes/categoryRoutes.js";
-
-const app = express();
-
-/*
-|--------------------------------------------------------------------------
-| CORS must be registered before every route
-|--------------------------------------------------------------------------
-*/
-
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(
-  "/uploads",
-  express.static(path.join(process.cwd(), "uploads"))
-);
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "Correct RaviXMobile backend is running",
-  });
-});
-
-app.use("/api/admin", adminRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/categories", categoryRoutes);
-
-const startServer = async () => {
+try {
+  for (const name of ['MONGODB_URI', 'JWT_SECRET', 'ADMIN_EMAIL', 'ADMIN_PASSWORD']) {
+    if (!process.env[name]) throw new Error(`Missing required environment variable: ${name}`);
+  }
+  if (process.env.NODE_ENV === 'production' && process.env.JWT_SECRET.length < 32) {
+    throw new Error('JWT_SECRET must contain at least 32 characters in production.');
+  }
   await connectDatabase();
-
-  const port = process.env.PORT || 5001;
-
-  app.listen(port, () => {
-    console.log(`Backend running at http://localhost:${port}`);
+  const port = Number(process.env.PORT) || 5001;
+  const server = app.listen(port, '0.0.0.0', () => console.log(`RaviXMobile backend running on port ${port}`));
+  let stopping = false;
+  const shutdown = () => {
+    if (stopping) return;
+    stopping = true;
+    const timeout = setTimeout(() => process.exit(1), 10000);
+    timeout.unref();
+    server.close(async () => {
+      await mongoose.disconnect();
+      clearTimeout(timeout);
+      process.exit(0);
+    });
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+  server.on('error', error => {
+    console.error(`HTTP server failed: ${error.code || error.name}`);
+    shutdown();
   });
-};
-
-startServer();
+} catch (error) {
+  // Connection errors can contain connection details. Do not print the URI or credentials.
+  console.error(`Startup failed: ${error.name}${error.code ? ` (${error.code})` : ''}. Check database access and required environment variables.`);
+  await mongoose.disconnect();
+  process.exit(1);
+}

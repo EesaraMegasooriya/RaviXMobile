@@ -1,14 +1,10 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-export const connectDatabase = async () => {
-  try {
-    const connection = await mongoose.connect(process.env.MONGODB_URI);
-
-    console.log(
-      `MongoDB connected: ${connection.connection.host}/${connection.connection.name}`
-    );
-  } catch (error) {
-    console.error("MongoDB connection failed:", error.message);
-    process.exit(1);
-  }
-};
+export async function connectDatabase() {
+  await mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 15000,
+    maxPoolSize: 10,
+  });
+  await mongoose.connection.db.command({ ping: 1 });
+  console.log(`MongoDB connected: ${mongoose.connection.name}`);
+}

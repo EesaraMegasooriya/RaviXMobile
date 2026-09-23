@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { isImageUrl } from "../utils/validation.js";
 
 const productSchema = new mongoose.Schema(
   {
@@ -42,6 +43,7 @@ const productSchema = new mongoose.Schema(
     img: {
       type: String,
       required: [true, "Product image is required."],
+      validate: { validator: isImageUrl, message: "Enter a valid HTTP or HTTPS image link." },
       trim: true,
     },
 

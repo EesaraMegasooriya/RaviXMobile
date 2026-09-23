@@ -1,4 +1,8 @@
-import React from "react";
+import Reviews from "../components/Reviews";
+import ProductImage from "../components/ProductImage";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { API_BASE_URL, WHATSAPP_NUMBER, getProductImageUrl } from "../lib/api";
 import {
   ArrowRight,
   Truck,
@@ -8,75 +12,39 @@ import {
   ShoppingCart,
   Star,
   Smartphone,
-  Zap,
-  Watch,
   MoveUpRight,
 } from "lucide-react";
 import { FloatingWhatsApp } from "react-floating-whatsapp";
 import Logo from "../assets/Logo.png";
 import Image from "../assets/image.png";
 
-import FrOffer1 from "../assets/FirstPageOffers/FrOffer1.JPG";
-import FrOffer2 from "../assets/FirstPageOffers/FrOffer2.JPG";
-import FrOffer3 from "../assets/FirstPageOffers/FrOffer3.JPG";
-import FrOffer4 from "../assets/FirstPageOffers/FrOffer4.JPG";
-import FrOffer5 from "../assets/FirstPageOffers/FrOffer5.JPG";
-import FrOffer6 from "../assets/FirstPageOffers/FrOffer6.JPG";
-
-
 function Home() {
-  const products = [
-  {
-    brand: "APPLE",
-    name: "Apple AirPods Max Wireless Headphones",
-    price: "LKR 4750",
-    oldPrice: "LKR 5500",
-    rating: "4.8",
-    // badge: "-27%",
-    img: FrOffer1,
-  },
-  {
-    brand: "ASPOR",
-    name: "ASPOR A628 TWS Wireless Earbuds",
-    price: "LKR 3700",
-    rating: "4.6",
-    badge: "New",
-    img: FrOffer5,
-  },
-  {
-    brand: "ASPOR",
-    name: "ASPOR A396 20000mAh Power Bank",
-    price: "LKR 4500",
-    oldPrice: "LKR 4900",
-    rating: "4.7",
-    // badge: "-30%",
-    img: FrOffer6,
-  },
-  {
-    brand: "BASEUS",
-    name: "BASEUS PALM 20W Fast Charger",
-    price: "LKR 4000",
-    rating: "5.0",
-    img: FrOffer2,
-  },
-  {
-    brand: "APPLE",
-    name: "Apple 20W USB-C Power Adapter",
-    price: "LKR 3500",
-    oldPrice: "LKR 4000",
-    rating: "4.5",
-    // badge: "-25%",
-    img: FrOffer3,
-  },
-  {
-    brand: "APPLE",
-    name: "USB-C to Lightning Cable",
-    price: "LKR 1100",
-    rating: "4.8",
-    badge: "Best Seller",
-    img: FrOffer4,
-  },
-];
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [failedHeroUrl, setFailedHeroUrl] = useState(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    axios.get(`${API_BASE_URL}/settings`, { signal: controller.signal })
+      .then(({ data }) => setHeroImageUrl(getProductImageUrl(data.settings.heroImageUrl)))
+      .catch(() => { /* Keep the bundled hero when settings are unavailable. */ });
+    return () => controller.abort();
+  }, []);
+  const [products, setProducts] = useState([]);
+  const [catalogCategories, setCatalogCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      axios.get(`${API_BASE_URL}/products`, { signal: controller.signal }),
+      axios.get(`${API_BASE_URL}/categories`, { signal: controller.signal }),
+    ]).then(([productsResult, categoriesResult]) => {
+      setProducts(productsResult.data.products.slice(0, 8));
+      setCatalogCategories(categoriesResult.data.categories);
+    }).catch(error => {
+      if (!axios.isCancel(error)) setError('Unable to load the collection. Visit the shop to try again.');
+    }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, []);
 
   const features = [
     [Truck, "Free Shipping", "On orders over 10000 LKR"],
@@ -85,12 +53,9 @@ function Home() {
     [Sparkles, "Trusted Brands", "Apple, Samsung, Anker"],
   ];
 
-  const categories = [
-    [Smartphone, "Phone Cases", "Premium protection for every device", "124 products"],
-    [Zap, "Chargers", "Fast charging for every need", "86 products"],
-    [Headphones, "Earphones", "Crystal-clear wireless audio", "64 products"],
-    [Watch, "Smart Watches", "Track. Connect. Perform.", "32 products"],
-  ];
+  const categories = catalogCategories.map(category => [
+    Smartphone, category.name, 'Explore our collection', `${category.productCount} products`,
+  ]);
 
   return (
     <main className="min-h-screen bg-[#05080B] text-white overflow-hidden">
@@ -154,7 +119,8 @@ function Home() {
 
   <div className="relative overflow-hidden rounded-[28px] shadow-2xl border border-white/10 bg-white/[0.03]">
     <img
-      src={Image}
+      src={heroImageUrl && failedHeroUrl !== heroImageUrl ? heroImageUrl : Image}
+      onError={() => setFailedHeroUrl(heroImageUrl)}
       alt="Premium RaviX mobile accessories including earbuds, chargers, power banks, and smart wearables"
       loading="eager"
       fetchPriority="high"
@@ -202,9 +168,9 @@ function Home() {
             <p className="text-cyan-400 tracking-[0.35em] text-xs font-bold uppercase mb-4">
               — Featured
             </p>
-            <h2 className="text-4xl md:text-5xl font-extrabold">Best Sellers</h2>
+            <h2 className="text-4xl md:text-5xl font-extrabold">Latest Products</h2>
             <p className="mt-5 text-lg text-gray-400">
-              Hand-picked accessories our customers can't get enough of.
+              Explore the latest accessories from our shop.
             </p>
           </div>
 
@@ -216,15 +182,18 @@ function Home() {
           </a>
         </div>
 
+        {loading && <p role="status" className="mb-6 text-gray-400">Loading products...</p>}
+        {error && <p role="alert" className="mb-6 text-gray-400">{error} <a href="/shop" className="text-cyan-400">Open shop →</a></p>}
+        {!loading && !error && products.length === 0 && <p className="text-gray-400">Our collection is being updated. Please check back soon.</p>}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((p) => (
             <div
-              key={p.name}
+              key={p._id}
               className="group overflow-hidden rounded-2xl bg-[#090D14] border border-white/10 hover:border-cyan-400/40 transition"
             >
               <div className="relative h-[330px] bg-black">
-                <img
-                  src={p.img}
+                <ProductImage
+                  src={getProductImageUrl(p.img)}
                   alt={p.name}
                   className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition duration-500"
                 />
@@ -250,7 +219,7 @@ function Home() {
                 <div className="mt-14 flex items-center justify-between">
                   <div>
                     <span className="text-2xl font-bold text-cyan-400">
-                      {p.price}
+                      {`LKR ${Number(p.price).toLocaleString("en-LK")}`}
                     </span>
                     {p.oldPrice && (
                       <span className="ml-2 text-sm text-gray-500 line-through">
@@ -259,9 +228,9 @@ function Home() {
                     )}
                   </div>
 
-                  <button className="w-11 h-11 rounded-full bg-cyan-400 text-black flex items-center justify-center hover:bg-cyan-300 transition">
+                  <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hello RaviXMobile, I would like to order ${p.name} (${p.brand}) for LKR ${p.price}. Image: ${p.img}`)}`} target="_blank" rel="noreferrer" aria-label={`Order ${p.name} on WhatsApp`} className="w-11 h-11 rounded-full bg-cyan-400 text-black flex items-center justify-center hover:bg-cyan-300 transition">
                     <ShoppingCart size={19} />
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -324,7 +293,7 @@ function Home() {
           {categories.map(([Icon, title, desc, count]) => (
             <a
               key={title}
-              href="/categories"
+              href={`/shop?category=${encodeURIComponent(title)}`}
               className="group relative rounded-[28px] bg-[#090D14] border border-white/10 p-9 min-h-[250px] hover:border-cyan-400/40 transition"
             >
               <MoveUpRight
@@ -344,8 +313,10 @@ function Home() {
         </div>
       </section>
 
+      <Reviews />
+
       <FloatingWhatsApp
-  phoneNumber="+94703280480"
+  phoneNumber={WHATSAPP_NUMBER}
   accountName="RavixMobile"
   chatMessage="Hello there! 🤝 How can I help?"
   avatar={Logo}

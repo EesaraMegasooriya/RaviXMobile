@@ -1,22 +1,24 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 
 import Header from "./components/Header";
-import Home from "./pages/Home";
+const Home = lazy(() => import("./pages/Home"));
 import Footer from "./components/Footer";
-import About from "./pages/About";
-import ShopNot from "./pages/ShopNot";
-import Shop from "./pages/Shop";
-import Categories from "./pages/Categories";
-import Contact from "./pages/Contact";
+const About = lazy(() => import("./pages/About"));
+const ShopNot = lazy(() => import("./pages/ShopNot"));
+const Shop = lazy(() => import("./pages/Shop"));
+const Categories = lazy(() => import("./pages/Categories"));
+const Contact = lazy(() => import("./pages/Contact"));
 
-import AdminPanel from "./pages/AdminPanel";
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 function App() {
   return (
     <BrowserRouter>
       <Header />
 
+      <Suspense fallback={<main className="min-h-screen bg-[#05080B] pt-40 text-center text-white" role="status">Loading...</main>}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -29,6 +31,7 @@ function App() {
 
 
       </Routes>
+      </Suspense>
 
       <Footer />
     </BrowserRouter>
