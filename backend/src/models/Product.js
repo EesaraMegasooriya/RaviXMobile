@@ -27,6 +27,15 @@ const productSchema = new mongoose.Schema(
       min: [0, "Price cannot be negative."],
     },
 
+    salePrice: {
+      type: Number,
+      default: null,
+      min: [0, "Sale price cannot be negative."],
+      validate: { validator(value) { return value == null || (Number.isFinite(value) && value < this.price); }, message: "Sale price must be lower than the regular price." },
+    },
+    availability: { type: String, enum: ["in_stock", "out_of_stock", "pre_order"], default: "in_stock" },
+    description: { type: String, trim: true, maxlength: 3000, default: "" },
+
     rating: {
       type: Number,
       default: 0,

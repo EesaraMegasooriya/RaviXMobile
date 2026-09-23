@@ -106,3 +106,16 @@ npm run test:live
 `test:live` creates a short-named temporary database on the configured cluster and removes it afterward; it needs permission to create/drop that temporary database. It does not write fixtures to the shop database. Ordinary `npm test` uses mocked persistence and does not contact Atlas.
 
 The live Atlas API smoke test and browser checks were run during setup. Docker Compose configuration was validated, but container build/start was not run locally because Docker Engine was not running. Run the start and health checks above on your server.
+
+## Deploy the discount / availability / reply update
+
+Deploy the backend first, then redeploy the Netlify frontend. These changes add optional fields to existing MongoDB documents; no manual migration is required. Existing products continue to work with no sale price, an empty description, and in-stock availability. Existing reviews display without replies until an admin posts one.
+
+New API support:
+
+- Product create/update: optional `salePrice` (number or null), `availability` (`in_stock`, `out_of_stock`, `pre_order`), and `description` (up to 3000 characters).
+- `GET /api/products/:id`: visible product details; hidden/missing products return 404.
+- `PUT /api/admin/reviews/:id/reply`: authenticated admin submits `{ "reply": "Thank you!" }` (1–2000 characters).
+- `DELETE /api/admin/reviews/:id/reply`: authenticated admin removes the reply.
+
+After deploying, edit a product to add a discount and availability, open its product page, verify the WhatsApp message without sending a test enquiry, then post and edit an admin reply. The existing Netlify SPA rewrite covers `/products/:id` links.

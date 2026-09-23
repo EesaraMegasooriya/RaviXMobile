@@ -28,3 +28,20 @@ export async function deleteReview(req, res, next) {
     res.json({ success: true, message: 'Review deleted.' });
   } catch (error) { next(error); }
 }
+
+export async function replyToReview(req, res, next) {
+  try {
+    const reply = req.body?.reply;
+    if (typeof reply !== 'string' || !reply.trim() || reply.trim().length > 2000) return res.status(400).json({ success: false, message: 'Enter a reply of 1–2000 characters.' });
+    const review = await Review.findByIdAndUpdate(req.params.id, { $set: { reply: reply.trim(), repliedAt: new Date() } }, { returnDocument: 'after', runValidators: true });
+    if (!review) return res.status(404).json({ success: false, message: 'Review not found.' });
+    res.json({ success: true, review });
+  } catch (error) { next(error); }
+}
+export async function deleteReviewReply(req, res, next) {
+  try {
+    const review = await Review.findByIdAndUpdate(req.params.id, { $set: { reply: '', repliedAt: null } }, { returnDocument: 'after', runValidators: true });
+    if (!review) return res.status(404).json({ success: false, message: 'Review not found.' });
+    res.json({ success: true, review });
+  } catch (error) { next(error); }
+}

@@ -1,3 +1,4 @@
+import ServiceError from "../components/ServiceError";
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package } from 'lucide-react';
@@ -13,7 +14,7 @@ export default function Categories() {
     const controller = new AbortController();
     axios.get(`${API_BASE_URL}/categories`, { signal: controller.signal })
       .then(({ data }) => setCategories(data.categories || []))
-      .catch(error => { if (!axios.isCancel(error)) setError('Unable to load categories. Please try again.'); })
+      .catch(error => { if (!axios.isCancel(error)) setError('Something went wrong. Please contact RaviX Mobile for help.'); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [attempt]);
@@ -22,7 +23,7 @@ export default function Categories() {
       <section className="mx-auto max-w-[1360px]">
         <h1 className="mb-5 text-center text-4xl font-bold md:text-6xl">Product <span className="text-cyan-400">Categories</span></h1>
         <p className="mb-12 text-center text-gray-400">Explore our mobile accessories by category.</p>
-        {loading ? <p role="status">Loading categories...</p> : error ? <div role="alert">{error} <button className="ml-3 text-cyan-400" onClick={() => { setLoading(true); setError(''); setAttempt(n => n + 1); }}>Retry</button></div> : categories.length === 0 ? <p>No categories available yet. Please check back soon.</p> : (
+        {loading ? <p role="status">Loading categories...</p> : error ? <ServiceError onRetry={() => { setLoading(true); setError(''); setAttempt(n => n + 1); }} /> : categories.length === 0 ? <p>No categories available yet. Please check back soon.</p> : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map(category => (
               <Link key={category._id} to={`/shop?category=${encodeURIComponent(category.name)}`} className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition hover:border-cyan-400">

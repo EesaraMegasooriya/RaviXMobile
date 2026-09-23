@@ -37,6 +37,9 @@ export const updateProduct = async (req, res, next) => {
     await validateCategory(input);
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
+    const mergedPrice = input.price ?? product.price;
+    const mergedSalePrice = input.salePrice !== undefined ? input.salePrice : product.salePrice;
+    if (mergedSalePrice != null && mergedSalePrice >= mergedPrice) return res.status(400).json({ success: false, message: 'Sale price must be lower than the regular price. Update or remove the discount.' });
     Object.assign(product, input);
     await product.save();
     res.json({ success: true, message: 'Product updated successfully.', product });
@@ -47,5 +50,13 @@ export const deleteProduct = async (req, res, next) => {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
     res.json({ success: true, message: 'Product deleted successfully.' });
+  } catch (error) { next(error); }
+};
+
+export const getPublicProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findOne({ _id: req.params.id, isActive: true });
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
+    res.json({ success: true, product });
   } catch (error) { next(error); }
 };

@@ -56,3 +56,14 @@ No persistent image disk or upload volume is required. `/api/health` confirms th
 Visitors can submit a name, whole-star rating (1–5), and a comment on the homepage without an account. Reviews are published immediately and listed newest first with pagination. These are shop reviews, separate from the existing product ratings. Admins can delete reviews in `/admin`. Anonymous submissions have a basic per-process limit of five attempts per IP per 15 minutes; invalid attempts also count. Behind a reverse proxy, the default Express IP may be shared, so configure trusted proxies for your host before relying on per-visitor limits. Multi-instance deployments should use a shared rate limiter.
 
 In `/admin`, **Homepage hero image** accepts a public direct HTTP/HTTPS image URL and shows a preview. Click **Save hero image** to persist it. **Use default**, followed by save, restores the bundled image. The homepage falls back to that default if settings are unavailable or the image fails to load. Only the URL is stored in MongoDB; images are never uploaded or downloaded by the backend.
+
+## Discounts, availability, product details and review replies
+
+- In `/admin`, **Price** remains the regular unit price. **Sale price** is optional and must be lower; clear it to remove a discount. The storefront shows the original price, discounted price, amount saved and percentage. Sorting uses the actual selling price.
+- **Availability** supports In stock, Out of stock and Pre-order. This is separate from the existing visibility checkbox. Hidden products are excluded from public listings and product-detail URLs. Existing products default to in stock without a discount.
+- Add product descriptions/specifications in admin. Product names and **View details** links open `/products/:id`, where customers can select quantities (1–99), see the total and copy the product link.
+- **Buy Now** opens WhatsApp with “Can I buy this product now?”, product ID/name/brand/category/description, availability, regular/discounted pricing, quantity, total, image URL and product link. Pre-order and out-of-stock products use appropriate enquiry wording. This prepares a message; the customer sends it. No stock reservation or payment occurs automatically.
+- Shop filters include **On sale** and **In stock only**. `/shop?sale=true` opens current discounted products. Static discount claims on the homepage were replaced with a link to actual offers.
+- In admin customer reviews, post, edit or remove the shop’s public reply. Only authenticated admins can change replies; public review submissions cannot add a reply.
+
+These additions follow [Baymard’s findings on clear sale-price presentation](https://baymard.com/research-articles/product-page-price-discounts) and use [WhatsApp’s supported click-to-chat format](https://faq.whatsapp.com/5913398998672934).
