@@ -8,7 +8,7 @@ import { API_BASE_URL } from "../lib/api";
 const emptyForm = { name: "", rating: "5", comment: "" };
 const MAX_COMMENT_LENGTH = 1000;
 
-export default function Reviews({ adminToken, onAuthError }) {
+export default function Reviews({ adminToken, onAuthError, onInitialLoad }) {
   const [form, setForm] = useState(emptyForm);
   const [hoverRating, setHoverRating] = useState(0);
   const [result, setResult] = useState({ reviews: [], total: 0, pages: 0 });
@@ -24,6 +24,7 @@ export default function Reviews({ adminToken, onAuthError }) {
     axios
       .get(`${API_BASE_URL}/reviews?page=${page}`, {
         signal: controller.signal,
+        timeout: 20000,
       })
       .then(({ data }) => {
         setResult(data);
@@ -34,10 +35,13 @@ export default function Reviews({ adminToken, onAuthError }) {
           setLoadError("Unable to load reviews. Please try again.");
       })
       .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+          onInitialLoad?.(false);
+        }
       });
     return () => controller.abort();
-  }, [page, revision]);
+  }, [page, revision, onInitialLoad]);
   function reload(nextPage = page) {
     setLoading(true);
     setPage(nextPage);

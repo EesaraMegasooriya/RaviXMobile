@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import { getProductImageUrl } from '../lib/api';
 
-export default function ProductImage({ src, alt, className }) {
+export default function ProductImage({ src, alt, className, loading = 'lazy' }) {
   const [failedSrc, setFailedSrc] = useState(null);
   const url = getProductImageUrl(src);
   if (!url || failedSrc === url) {
@@ -17,5 +17,5 @@ export default function ProductImage({ src, alt, className }) {
       </div>
     );
   }
-  return <img src={url} alt={alt} className={className} loading="lazy" referrerPolicy="no-referrer" onError={() => setFailedSrc(url)} />;
+  return <img src={url} alt={alt} className={className} loading={loading} referrerPolicy="no-referrer" onError={() => setFailedSrc(url)} />;
 }

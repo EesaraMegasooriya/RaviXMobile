@@ -5,7 +5,7 @@ import Logo from "../assets/Logo.png";
 // indeterminate progress bar — both respect prefers-reduced-motion.
 function WebLoader() {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-[#05080B]">
+    <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center gap-8 bg-[#05080B]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:56px_56px]" />
 
       <img

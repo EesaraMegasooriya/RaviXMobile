@@ -4,6 +4,7 @@ import { purchaseLabel, whatsappProductUrl } from "../lib/products";
 import Reviews from "../components/Reviews";
 import ServiceError from "../components/ServiceError";
 import ProductImage from "../components/ProductImage";
+import HomeLoader from "../components/HomeLoader";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_BASE_URL, WHATSAPP_NUMBER, getProductImageUrl } from "../lib/api";
@@ -28,13 +29,18 @@ const RADIUS = "rounded-2xl";
 function Home() {
   const [heroImageUrl, setHeroImageUrl] = useState("");
   const [failedHeroUrl, setFailedHeroUrl] = useState(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   useEffect(() => {
     const controller = new AbortController();
     axios
-      .get(`${API_BASE_URL}/settings`, { signal: controller.signal })
+      .get(`${API_BASE_URL}/settings`, { signal: controller.signal, timeout: 20000 })
       .then(({ data }) => setHeroImageUrl(getProductImageUrl(data.settings.heroImageUrl)))
       .catch(() => {
         /* Keep the bundled hero when settings are unavailable. */
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSettingsLoading(false);
       });
     return () => controller.abort();
   }, []);
@@ -46,8 +52,8 @@ function Home() {
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
-      axios.get(`${API_BASE_URL}/products`, { signal: controller.signal }),
-      axios.get(`${API_BASE_URL}/categories`, { signal: controller.signal }),
+      axios.get(`${API_BASE_URL}/products`, { signal: controller.signal, timeout: 20000 }),
+      axios.get(`${API_BASE_URL}/categories`, { signal: controller.signal, timeout: 20000 }),
     ])
       .then(([productsResult, categoriesResult]) => {
         setProducts(productsResult.data.products.slice(0, 8));
@@ -80,6 +86,7 @@ function Home() {
 
   return (
     <main className="min-h-screen bg-[#05080B] text-white">
+      <HomeLoader dataLoading={loading || settingsLoading || reviewsLoading} />
       {/* HERO — full-bleed banner, image fills the section edge-to-edge ---- */}
       <section className="relative h-[86vh] min-h-[560px] w-full overflow-hidden">
         <img
@@ -203,6 +210,7 @@ function Home() {
                 >
                   <div className="relative aspect-square shrink-0 bg-black">
                     <ProductImage
+                      loading="eager"
                       src={getProductImageUrl(p.img)}
                       alt={p.name}
                       className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
@@ -304,7 +312,7 @@ function Home() {
         </div>
       </section>
 
-      <Reviews />
+      <Reviews onInitialLoad={setReviewsLoading} />
 
       <FloatingWhatsApp
         phoneNumber={WHATSAPP_NUMBER}
